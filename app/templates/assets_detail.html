@@ -1,0 +1,68 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Detail Aset: {{ asset.asset_name }}</h2>
+...
+<h2>Detail Aset: {{ asset.asset_name }}</h2>
+
+<a href="{{ url_for('work_orders.create_work_order', asset_id=asset._id) }}" 
+   style="font-weight: bold; color: red; padding: 8px; border: 1px solid red;">
+    Laporkan Kerusakan pada Aset Ini
+</a>
+<br><br>
+
+<p><strong>Tipe:</strong> {{ asset.type }}</p>
+...
+<p><strong>Tipe:</strong> {{ asset.type }}</p>
+<p><strong>Lokasi:</strong> {{ asset.location }}</p>
+<p><strong>Status:</strong> {{ asset.status }}</p>
+<p><strong>Total Jam Pakai:</strong> {{ asset.total_runtime_hours }} jam</p>
+
+<h3>Daftar Komponen ({{ asset.components|length }} komponen)</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Nama Komponen</th>
+            <th>Tipe Perawatan</th>
+            <th>Status Saat Ini</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for comp in asset.components %}
+        <tr>
+            <td>{{ comp.name }}</td>
+            <td>{{ comp.type }}</td>
+            <td>{{ comp.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr>
+<h3>Jadwal Perawatan (Rutin) untuk Aset Ini</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Nama Tugas</th>
+            <th>Frekuensi (Per)</th>
+            <th>Jatuh Tempo Berikutnya</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for schedule in schedules %}
+        <tr>
+            <td>{{ schedule.task_name }}</td>
+            <td>{{ schedule.frequency_days }} hari</td>
+            <td>{{ schedule.next_due_date.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3">Tidak ada jadwal rutin untuk tipe aset ini.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br>
+<a href="{{ url_for('assets.list_assets') }}">&larr; Kembali ke Daftar Aset</a>
+{% endblock %}

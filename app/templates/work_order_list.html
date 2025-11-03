@@ -1,0 +1,39 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Daftar Work Order Aktif</h2>
+<p>Work order yang masih berstatus "Open" atau "In-Progress".</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Judul</th>
+            <th>Nama Aset</th>
+            <th>Tipe</th>
+            <th>Prioritas</th>
+            <th>Status</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wo in work_orders %}
+        <tr>
+            <td>{{ wo.title }}</td>
+            <td>{{ wo.asset_name }}</td>
+            <td>{{ wo.type }}</td>
+            <td>{{ wo.priority }}</td>
+            <td>{{ wo.status }}</td>
+            <td>
+                <a href="{{ url_for('work_orders.detail_work_order', wo_id=wo._id) }}">
+                    Lihat Detail
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">Tidak ada work order aktif.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

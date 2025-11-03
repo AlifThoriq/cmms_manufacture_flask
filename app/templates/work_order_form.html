@@ -1,0 +1,41 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Laporan Kerusakan / Work Order Baru</h2>
+<p>Anda sedang membuat laporan untuk aset: 
+    <strong>{{ asset.asset_name }} ({{ asset.type }})</strong>
+</p>
+
+<form method="POST">
+    <div>
+        <label for="wo_type">Tipe Laporan:</label><br>
+        <select id="wo_type" name="wo_type" required>
+            <option value="Incident">Insiden / Kerusakan</option>
+            <option value="Audit">Laporan Audit</option>
+            <option value="Compliance">Pengecekan Kepatuhan</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <label for="title">Judul Laporan:</label><br>
+        <input type="text" id="title" name="title" required placeholder="Misal: Bearing Crusher 01 panas">
+    </div>
+    <br>
+    <div>
+        <label for="priority">Prioritas:</label><br>
+        <select id="priority" name="priority" required>
+            <option value="Low">Rendah</option>
+            <option value="Medium">Medium</option>
+            <option value="High">Tinggi (Darurat)</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <label for="description">Deskripsi / Keterangan:</label><br>
+        <textarea id="description" name="description" rows="4" cols="50" required 
+                  placeholder="Jelaskan apa yang terjadi..."></textarea>
+    </div>
+    <br>
+    <button type="submit">Buat Laporan</button>
+</form>
+{% endblock %}

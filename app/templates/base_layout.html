@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-M">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMMS Manufaktur</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        nav { background-color: #f0f0f0; padding: 10px; }
+        nav a { margin-right: 15px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('reporting.dashboard') }}" style="font-weight:bold;">Dashboard</a>
+        
+        <a href="{{ url_for('assets.list_assets') }}">Manajemen Aset</a>
+        <a href="{{ url_for('work_orders.list_work_orders') }}">Work Order Aktif</a>
+        <a href="{{ url_for('work_orders.list_history') }}">Histori Perawatan</a>
+        <a href="{{ url_for('inventory.list_inventory') }}">Inventory</a>
+        <a href="{{ url_for('schedules.list_schedules') }}">Penjadwalan</a>
+        <a href="{{ url_for('work_orders.list_tracking') }}">Pelacakan Audit</a>
+        </nav>
+    <hr>
+    <main>
+        {% block content %}
+        {{ content|safe }}
+        {% endblock %}
+    </main>
+</body>
+</html>

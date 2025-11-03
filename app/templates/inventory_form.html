@@ -1,0 +1,41 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+
+{% if part %}
+    <h2>Edit Spare Part: {{ part.part_name }}</h2>
+{% else %}
+    <h2>Tambah Spare Part Baru</h2>
+{% endif %}
+
+<form method="POST">
+    <div>
+        <label for="part_name">Nama Part:</label><br>
+        <input type="text" id="part_name" name="part_name" required 
+               value="{{ part.part_name if part else '' }}">
+    </div>
+    <br>
+    <div>
+        <label for="part_number">Nomor Part (SKU):</label><br>
+        <input type="text" id="part_number" name="part_number" required 
+               value="{{ part.part_number if part else '' }}">
+    </div>
+    <br>
+    <div>
+        <label for="stock_on_hand">Stok Saat Ini (Jumlah):</label><br>
+        <input type="number" id="stock_on_hand" name="stock_on_hand" required 
+               value="{{ part.stock_on_hand if part else 0 }}">
+    </div>
+    <br>
+    <div>
+        <label for="min_stock_level">Stok Minimum (Peringatan):</label><br>
+        <input type="number" id="min_stock_level" name="min_stock_level" required 
+               value="{{ part.min_stock_level if part else 5 }}">
+    </div>
+    <br>
+    <button type="submit">Simpan Spare Part</button>
+</form>
+
+<br>
+<a href="{{ url_for('inventory.list_inventory') }}">&larr; Kembali ke Daftar Inventory</a>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Histori Perawatan (Maintenance History)</h2>
+<p>Daftar semua work order yang telah selesai (status "Closed").</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Judul</th>
+            <th>Nama Aset</th>
+            <th>Tipe</th>
+            <th>Tanggal Dibuat</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wo in work_orders %}
+        <tr>
+            <td>{{ wo.title }}</td>
+            <td>{{ wo.asset_name }}</td>
+            <td>{{ wo.type }}</td>
+            <td>{{ wo.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>
+                <a href="{{ url_for('work_orders.detail_work_order', wo_id=wo._id) }}">
+                    Lihat Detail
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">Belum ada histori perawatan.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

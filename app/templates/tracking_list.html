@@ -1,0 +1,39 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Pelacakan Audit & Kepatuhan (Compliance)</h2>
+<p>Daftar semua laporan yang bertipe "Audit" atau "Compliance".</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Judul</th>
+            <th>Tipe</th>
+            <th>Nama Aset</th>
+            <th>Status</th>
+            <th>Tanggal Dibuat</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.title }}</td>
+            <td>{{ item.type }}</td>
+            <td>{{ item.asset_name }}</td>
+            <td>{{ item.status }}</td>
+            <td>{{ item.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('work_orders.detail_work_order', wo_id=item._id) }}">
+                    Lihat Detail
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">Belum ada data Audit atau Compliance.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

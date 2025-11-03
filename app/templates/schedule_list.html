@@ -1,0 +1,35 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Jadwal Perawatan Preventif</h2>
+<a href="{{ url_for('schedules.add_schedule') }}" style="font-weight: bold; color: green;">
+    + Buat Jadwal Baru
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nama Tugas</th>
+            <th>Tipe Aset</th>
+            <th>Frekuensi (Per)</th>
+            <th>Jatuh Tempo Berikutnya</th>
+            <th>Terakhir Dilakukan</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for schedule in schedules %}
+        <tr>
+            <td>{{ schedule.task_name }}</td>
+            <td>{{ schedule.asset_type }}</td>
+            <td>{{ schedule.frequency_days }} hari</td>
+            <td>{{ schedule.next_due_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ schedule.last_completed.strftime('%Y-%m-%d') if schedule.last_completed else 'Belum pernah' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">Belum ada jadwal perawatan.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

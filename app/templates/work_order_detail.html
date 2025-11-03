@@ -1,0 +1,54 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Detail Work Order: {{ wo.title }}</h2>
+
+<div style="float: right; border: 1px solid #ccc; padding: 10px;">
+    <h4>Informasi Aset</h4>
+    <p><strong>Nama:</strong> {{ wo.asset_name }}</p>
+    <p><strong>Tipe:</strong> {{ wo.type }}</p>
+    <p><strong>Status WO:</strong> {{ wo.status }}</p>
+    <p><strong>Prioritas:</strong> {{ wo.priority }}</p>
+</div>
+
+<h3>Deskripsi Masalah</h3>
+<p>{{ wo.description }}</p>
+
+<hr>
+
+{% if wo.status != 'Closed' %}
+<h3>Update / Tutup Work Order</h3>
+<p>Gunakan form ini untuk mencatat tindakan perbaikan atau menutup work order.</p>
+<form method="POST">
+    <div>
+        <label for="action_log">Catatan Tindakan:</label><br>
+        <textarea id="action_log" name="action_log" rows="4" cols="50" required 
+                  placeholder="Misal: 'Bearing diganti dengan part baru. Vibrasi normal.'"></textarea>
+    </div>
+    <br>
+    <div>
+        <label for="final_status">Ubah Status Menjadi:</label><br>
+        <select id="final_status" name="final_status" required>
+            <option value="In-Progress">In-Progress (Tindakan dicatat, tapi belum selesai)</option>
+            <option value="Closed">Closed (Pekerjaan Selesai)</option>
+        </select>
+    </div>
+    <br>
+    <button type="submit">Simpan Update</button>
+</form>
+<hr>
+{% endif %}
+
+<h3>Histori Log untuk Work Order Ini</h3>
+<ul>
+    {% for log in wo.history_log|reverse %}
+        <li>
+            <strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong> 
+            (oleh {{ log.user }}): {{ log.action }}
+        </li>
+    {% endfor %}
+</ul>
+
+<br>
+<a href="{{ url_for('work_orders.list_work_orders') }}">&larr; Kembali ke Daftar WO Aktif</a>
+{% endblock %}

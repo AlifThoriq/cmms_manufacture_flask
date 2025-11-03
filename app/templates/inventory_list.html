@@ -1,0 +1,47 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Manajemen Inventory (Spare Part)</h2>
+<a href="{{ url_for('inventory.add_part') }}" style="font-weight: bold; color: green;">
+    + Tambah Spare Part Baru
+</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nama Part</th>
+            <th>Nomor Part</th>
+            <th>Stok Saat Ini</th>
+            <th>Stok Minimum</th>
+            <th>Status Stok</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for part in parts %}
+        <tr>
+            <td>{{ part.part_name }}</td>
+            <td>{{ part.part_number }}</td>
+            <td>{{ part.stock_on_hand }}</td>
+            <td>{{ part.min_stock_level }}</td>
+            <td>
+                {% if part.low_stock %}
+                    <strong style="color: red;">STOK TIPIS</strong>
+                {% else %}
+                    <span style="color: green;">Aman</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('inventory.edit_part', part_id=part._id) }}">
+                    Edit Stok
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6">Belum ada data spare part.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

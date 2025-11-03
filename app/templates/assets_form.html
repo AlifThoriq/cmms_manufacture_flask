@@ -1,0 +1,29 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Tambah Aset Baru</h2>
+<form method="POST">
+    <div>
+        <label for="asset_name">Nama Aset:</label><br>
+        <input type="text" id="asset_name" name="asset_name" required>
+    </div>
+    <br>
+    <div>
+        <label for="asset_type">Tipe Aset:</label><br>
+        <select id="asset_type" name="asset_type" required>
+            <option value="">-- Pilih Tipe --</option>
+            <option value="Crusher">Crusher</option>
+            <option value="Ball Mill">Ball Mill</option>
+            <option value="Flotation Cell">Flotation Cell</option>
+            <option value="Smelter / Furnace">Smelter / Furnace</option>
+        </select>
+    </div>
+    <br>
+    <div>
+        <label for="location">Lokasi:</label><br>
+        <input type="text" id="location" name="location" required>
+    </div>
+    <br>
+    <button type="submit">Simpan Aset</button>
+</form>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Dashboard Laporan CMMS</h2>
+
+<style>
+    .stat-card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        width: 200px;
+        margin: 10px;
+        display: inline-block;
+        box-shadow: 2px 2px 5px #f0f0f0;
+    }
+    .stat-title { font-size: 1.1em; font-weight: bold; }
+    .stat-number { font-size: 2.5em; font-weight: bold; }
+</style>
+
+<h3>Ringkasan Sistem</h3>
+<div class="stat-card">
+    <div class="stat-title">Total Aset</div>
+    <div class="stat-number">{{ stats.get('total_assets', 0) }}</div>
+</div>
+<div class="stat-card">
+    <div class="stat-title">Aset Dalam Perbaikan</div>
+    <div class="stat-number">{{ stats.get('assets_under_maintenance', 0) }}</div>
+</div>
+<div class="stat-card">
+    <div class="stat-title">WO Aktif (Open)</div>
+    <div class="stat-number" style="color: orange;">{{ stats.get('wo_open', 0) }}</div>
+</div>
+<div class="stat-card">
+    <div class="stat-title">Total Part Stok Tipis</div>
+    <div class="stat-number" style="color: red;">{{ stats.get('low_stock_count', 0) }}</div>
+</div>
+
+<hr>
+
+<h3>Analisis (Documentation & Reporting)</h3>
+
+<div style="display: flex;">
+    <div style="flex: 1; padding-right: 20px;">
+        <h4>Aset Paling Sering Rusak (Top 3)</h4>
+        <p>Berdasarkan jumlah laporan "Insiden / Kerusakan".</p>
+        <ol>
+            {% for asset in stats.get('top_problem_assets', []) %}
+                <li>
+                    <strong>{{ asset._id }}</strong> - ({{ asset.count }} kali)
+                </li>
+            {% else %}
+                <li>Belum ada data insiden.</li>
+            {% endfor %}
+        </ol>
+    </div>
+    
+    <div style="flex: 1; border-left: 1px solid #ccc; padding-left: 20px;">
+        <h4>Spare Part Stok Tipis</h4>
+        <p>Part yang stoknya di bawah atau sama dengan batas minimum.</p>
+        <ul>
+            {% for part in stats.get('inventory_low_stock', []) %}
+                <li>
+                    {{ part.part_name }} (Stok: {{ part.stock_on_hand }})
+                </li>
+            {% else %}
+                <li>Semua stok aman.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
