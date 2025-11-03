@@ -1,0 +1,10 @@
+# Virtual Environment
+venv/
+*.pyc
+
+# File Rahasia
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
