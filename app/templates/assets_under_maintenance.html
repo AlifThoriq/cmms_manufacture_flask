@@ -1,0 +1,26 @@
+{% extends "base_layout.html" %}
+{% block content %}
+<h2>Aset Dalam Perbaikan</h2>
+<p>Daftar semua aset yang sedang dalam status <strong>Under Maintenance</strong>.</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+    <tr>
+        <th>Kode Aset</th>
+        <th>Nama Aset</th>
+        <th>Lokasi</th>
+        <th>Status</th>
+        <th>Terakhir Diperbarui</th>
+    </tr>
+    {% for a in assets %}
+    <tr>
+        <td>{{ a.asset_id }}</td>
+        <td>{{ a.asset_name }}</td>
+        <td>{{ a.location }}</td>
+        <td style="color: orange;">{{ a.status }}</td>
+        <td>{{ a.last_maintenance_date }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Tidak ada aset dalam perbaikan saat ini.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

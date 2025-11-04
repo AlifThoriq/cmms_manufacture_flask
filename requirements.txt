@@ -1,1 +1,8 @@
-pip freeze > requirements.txt
+flask
+flask_sqlalchemy
+flask_migrate
+flask_cors
+python-dotenv
+requests
+pandas
+numpy

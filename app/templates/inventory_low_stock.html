@@ -1,0 +1,26 @@
+{% extends "base_layout.html" %}
+{% block content %}
+<h2>Part dengan Stok Tipis</h2>
+<p>Menampilkan part yang stoknya di bawah atau sama dengan batas minimum (≤ 5).</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+    <tr>
+        <th>Kode Part</th>
+        <th>Nama Part</th>
+        <th>Jumlah Stok</th>
+        <th>Minimum Stok</th>
+        <th>Lokasi Penyimpanan</th>
+    </tr>
+    {% for p in parts %}
+    <tr>
+        <td>{{ p.part_code }}</td>
+        <td>{{ p.part_name }}</td>
+        <td style="color: red;">{{ p.stock_on_hand }}</td>
+        <td>{{ p.min_stock }}</td>
+        <td>{{ p.location }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Semua part dalam kondisi stok aman.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

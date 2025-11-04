@@ -18,6 +18,25 @@
 <p><strong>Status:</strong> {{ asset.status }}</p>
 <p><strong>Total Jam Pakai:</strong> {{ asset.total_runtime_hours }} jam</p>
 
+<!-- 🔹 Form Update Aset -->
+<form action="{{ url_for('assets.update_asset', asset_id=asset._id) }}" method="POST" style="margin-top: 20px;">
+    <h3>Perbarui Data Aset</h3>
+
+    <label for="status">Status Baru:</label>
+    <select name="status" id="status">
+        <option value="Active" {% if asset.status == 'Active' %}selected{% endif %}>Active</option>
+        <option value="Under Maintenance" {% if asset.status == 'Under Maintenance' %}selected{% endif %}>Under Maintenance</option>
+        <option value="Offline" {% if asset.status == 'Offline' %}selected{% endif %}>Offline</option>
+    </select>
+
+    <label for="location" style="margin-left: 15px;">Lokasi Baru:</label>
+    <input type="text" name="location" id="location" value="{{ asset.location }}">
+
+    <button type="submit" style="margin-left: 10px; background: #3498db; color: white; border: none; padding: 6px 10px; border-radius: 4px;">
+        Update Aset
+    </button>
+</form>
+
 <h3>Daftar Komponen ({{ asset.components|length }} komponen)</h3>
 <table>
     <thead>

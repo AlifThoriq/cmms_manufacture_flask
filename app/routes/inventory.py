@@ -21,6 +21,19 @@ def list_inventory():
         
     return render_template('inventory_list.html', parts=all_parts)
 
+# 🔹 RUTE UNTUK MENAMPILKAN PART DENGAN STOK TIPIS
+@inventory_bp.route('/low_stock')
+def low_stock_inventory():
+    """Menampilkan daftar part yang stoknya di bawah atau sama dengan batas minimum."""
+    try:
+        low_stock_parts = list(inventory_collection.find({
+            "$expr": {"$lte": ["$stock_on_hand", "$min_stock_level"]}
+        }))
+    except Exception as e:
+        print(f"Error fetching low stock parts: {e}")
+        low_stock_parts = []
+        
+    return render_template('inventory_low_stock.html', parts=low_stock_parts)
 
 # 3. BUAT RUTE UNTUK MENAMBAH SPARE PART (Create)
 @inventory_bp.route('/add', methods=['GET', 'POST'])

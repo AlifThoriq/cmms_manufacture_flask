@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Maintenance Team</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Tim Maintenance Mesin Crusher</h1>
+        <div class="row">
+            {% for member in team %}
+            <div class="col-md-3">
+                <div class="card mb-4 shadow-sm">
+                    <img src="{{ member.photo }}" class="card-img-top" alt="{{ member.name }}">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ member.name }}</h5>
+                        <p class="text-muted">{{ member.position }}</p>
+                        <p><strong>Tanggung Jawab:</strong><br>{{ member.responsibility }}</p>
+                        <p class="small">📧 {{ member.contact }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
