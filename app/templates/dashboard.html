@@ -1,75 +1,76 @@
 {% extends "base_layout.html" %}
-
 {% block content %}
-<h2>Dashboard Laporan CMMS</h2>
 
-<style>
-    .stat-card {
-        border: 1px solid #ccc;
-        padding: 15px;
-        width: 200px;
-        margin: 10px;
-        display: inline-block;
-        box-shadow: 2px 2px 5px #f0f0f0;
-    }
-    .stat-title { font-size: 1.1em; font-weight: bold; }
-    .stat-number { font-size: 2.5em; font-weight: bold; }
-</style>
+<h2 class="mb-4"><i class="fa fa-chart-line text-primary"></i> Dashboard Laporan CMMS</h2>
 
-<h3>Ringkasan Sistem</h3>
-<div class="stat-card">
-    <div class="stat-title">Total Aset</div>
-    <div class="stat-number">{{ stats.get('total_assets', 0) }}</div>
-    <a href="{{ url_for('assets.list_assets') }}">See More</a>
-</div>
-<div class="stat-card">
-    <div class="stat-title">Aset Dalam Perbaikan</div>
-    <div class="stat-number">{{ stats.get('assets_under_maintenance', 0) }}</div>
-    <a href="{{ url_for('assets.assets_under_maintenance') }}">See More</a>
-</div>
-<div class="stat-card">
-    <div class="stat-title">WO Aktif (Open)</div>
-    <div class="stat-number" style="color: orange;">{{ stats.get('wo_open', 0) }}</div>
-    <a href="{{ url_for('work_orders.list_work_orders') }}">See More</a>
-</div>
-<div class="stat-card">
-    <div class="stat-title">Total Part Stok Tipis</div>
-    <div class="stat-number" style="color: red;">{{ stats.get('low_stock_count', 0) }}</div>
-    <a href="{{ url_for('inventory.low_stock_inventory') }}">See More</a>
-</div>
-
-<hr>
-
-<h3>Analisis (Documentation & Reporting)</h3>
-
-<div style="display: flex;">
-    <div style="flex: 1; padding-right: 20px;">
-        <h4>Aset Paling Sering Rusak (Top 3)</h4>
-        <p>Berdasarkan jumlah laporan "Insiden / Kerusakan".</p>
-        <ol>
-            {% for asset in stats.get('top_problem_assets', []) %}
-                <li>
-                    <strong>{{ asset._id }}</strong> - ({{ asset.count }} kali)
-                </li>
-            {% else %}
-                <li>Belum ada data insiden.</li>
-            {% endfor %}
-        </ol>
+<div class="row g-4">
+  <div class="col-md-3">
+    <div class="card border-primary text-center">
+      <div class="card-body">
+        <h6>Total Aset</h6>
+        <h3>{{ stats.get('total_assets', 0) }}</h3>
+        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-primary btn-sm mt-2">Lihat Detail</a>
+      </div>
     </div>
-    
-    <div style="flex: 1; border-left: 1px solid #ccc; padding-left: 20px;">
-        <h4>Spare Part Stok Tipis</h4>
-        <p>Part yang stoknya di bawah atau sama dengan batas minimum.</p>
-        <ul>
-            {% for part in stats.get('inventory_low_stock', []) %}
-                <li>
-                    {{ part.part_name }} (Stok: {{ part.stock_on_hand }})
-                </li>
-            {% else %}
-                <li>Semua stok aman.</li>
-            {% endfor %}
-        </ul>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-danger text-center">
+      <div class="card-body">
+        <h6>Aset Dalam Perbaikan</h6>
+        <h3>{{ stats.get('assets_under_maintenance', 0) }}</h3>
+        <a href="{{ url_for('assets.assets_under_maintenance') }}" class="btn btn-outline-danger btn-sm mt-2">Lihat Detail</a>
+      </div>
     </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-warning text-center">
+      <div class="card-body">
+        <h6>WO Aktif (Open)</h6>
+        <h3 class="text-warning">{{ stats.get('wo_open', 0) }}</h3>
+        <a href="{{ url_for('work_orders.list_work_orders') }}" class="btn btn-outline-warning btn-sm mt-2">Lihat Detail</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-info text-center">
+      <div class="card-body">
+        <h6>Total Part Stok Tipis</h6>
+        <h3 class="text-info">{{ stats.get('low_stock_count', 0) }}</h3>
+        <a href="{{ url_for('inventory.low_stock_inventory') }}" class="btn btn-outline-info btn-sm mt-2">Lihat Detail</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="my-4">
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="report-section">
+      <h4><i class="fa fa-wrench text-primary"></i> Aset Paling Sering Rusak (Top 3)</h4>
+      <p>Berdasarkan jumlah laporan kerusakan.</p>
+      <ol>
+        {% for asset in stats.get('top_problem_assets', []) %}
+          <li><strong>{{ asset._id }}</strong> - {{ asset.count }} kali</li>
+        {% else %}
+          <li>Belum ada data insiden.</li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="report-section">
+      <h4><i class="fa fa-box-open text-danger"></i> Spare Part Stok Tipis</h4>
+      <p>Part dengan stok di bawah batas minimum.</p>
+      <ul>
+        {% for part in stats.get('inventory_low_stock', []) %}
+          <li>{{ part.part_name }} — (Stok: {{ part.stock_on_hand }})</li>
+        {% else %}
+          <li>Semua stok aman.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

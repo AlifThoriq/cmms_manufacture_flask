@@ -1,81 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-M">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CMMS Manufaktur</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        body { font-family: sans-serif; margin: 20px; }
-        nav { background-color: #f0f0f0; padding: 10px; }
-        nav a { margin-right: 15px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #eee; }
-        .back-btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 6px 12px;
-            background-color: #ddd;
-            color: #000;
-            text-decoration: none;
-            border-radius: 4px;
-        }
-        .back-btn:hover {
-            background-color: #bbb;
-        }
-    </style>
-</head>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<body>
-    <nav>
-        <a href="{{ url_for('reporting.dashboard') }}" style="font-weight:bold;">
-            <i class="fa fa-chart-line"></i> Dashboard
-        </a>
-        <a href="{{ url_for('assets.list_assets') }}">
-            <i class="fa fa-cogs"></i> Manajemen Aset
-        </a>
-        <a href="{{ url_for('work_orders.list_work_orders') }}">
-            <i class="fa fa-clipboard-list"></i> Work Order Aktif
-        </a>
-        <a href="{{ url_for('work_orders.list_history') }}">
-            <i class="fa fa-history"></i> Histori Perawatan
-        </a>
-        <a href="{{ url_for('inventory.list_inventory') }}">
-            <i class="fa fa-boxes-stacked"></i> Inventory
-        </a>
-        <a href="{{ url_for('schedules.list_schedules') }}">
-            <i class="fa fa-calendar-alt"></i> Penjadwalan
-        </a>
-        <a href="{{ url_for('work_orders.list_tracking') }}">
-            <i class="fa fa-check-circle"></i> Pelacakan Audit
-        </a>
-    </nav>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMMS Manufaktur</title>
 
-    <!-- 🔹 Tambahkan Tombol Kembali di sini -->
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Custom Style -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+  <!-- 🔹 NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="{{ url_for('reporting.dashboard') }}">
+        <i class="fa fa-industry"></i> CMMS Manufaktur
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.list_assets') }}"><i class="fa fa-cogs"></i> Aset</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('work_orders.list_work_orders') }}"><i class="fa fa-clipboard-list"></i> Work Order</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('work_orders.list_history') }}"><i class="fa fa-history"></i> Histori</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('inventory.list_inventory') }}"><i class="fa fa-boxes-stacked"></i> Inventory</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('schedules.list_schedules') }}"><i class="fa fa-calendar-alt"></i> Penjadwalan</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('work_orders.list_tracking') }}"><i class="fa fa-check-circle"></i> Audit</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('assets.maintenance_team') }}">Maintenance Team</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 🔹 MAIN CONTENT -->
+  <div class="container mt-4">
     {% if request.referrer %}
-        <a href="{{ request.referrer }}" class="back-btn">← Kembali</a>
+      <a href="{{ request.referrer }}" class="btn btn-secondary mb-3">
+        <i class="fa fa-arrow-left"></i> Kembali
+      </a>
     {% endif %}
 
-    <hr>
+    {% block content %}{% endblock %}
+  </div>
 
-    <main>
-        {% block content %}
-        {{ content|safe }}
-        {% endblock %}
-    </main>
-    {% if message %}
-<script>
-Swal.fire({
-    icon: 'success',
-    title: 'Berhasil!',
-    text: '{{ message }}',
-    confirmButtonColor: '#3085d6',
-    confirmButtonText: 'OK'
-});
-</script>
-{% endif %}
+  <!-- 🔹 FOOTER -->
+  <footer class="mt-5 py-3 bg-dark text-light text-center border-top border-primary">
+    <small>© 2025 CMMS Manufaktur — All Rights Reserved</small>
+  </footer>
 
+  <!-- SweetAlert Notification -->
+  {% if message %}
+  <script>
+  Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: '{{ message }}',
+      confirmButtonColor: '#3085d6',
+      confirmButtonText: 'OK'
+  });
+  </script>
+  {% endif %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
