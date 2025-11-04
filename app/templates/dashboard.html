@@ -20,18 +20,22 @@
 <div class="stat-card">
     <div class="stat-title">Total Aset</div>
     <div class="stat-number">{{ stats.get('total_assets', 0) }}</div>
+    <a href="{{ url_for('assets.list_assets') }}">See More</a>
 </div>
 <div class="stat-card">
     <div class="stat-title">Aset Dalam Perbaikan</div>
     <div class="stat-number">{{ stats.get('assets_under_maintenance', 0) }}</div>
+    <a href="{{ url_for('assets.assets_under_maintenance') }}">See More</a>
 </div>
 <div class="stat-card">
     <div class="stat-title">WO Aktif (Open)</div>
     <div class="stat-number" style="color: orange;">{{ stats.get('wo_open', 0) }}</div>
+    <a href="{{ url_for('work_orders.list_work_orders') }}">See More</a>
 </div>
 <div class="stat-card">
     <div class="stat-title">Total Part Stok Tipis</div>
     <div class="stat-number" style="color: red;">{{ stats.get('low_stock_count', 0) }}</div>
+    <a href="{{ url_for('inventory.low_stock_inventory') }}">See More</a>
 </div>
 
 <hr>

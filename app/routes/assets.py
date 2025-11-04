@@ -65,6 +65,18 @@ def list_assets():
         
     return render_template('assets_list.html', assets=all_assets)
 
+# 🔹 RUTE UNTUK MENAMPILKAN ASET DALAM PERBAIKAN
+@assets_bp.route('/under_maintenance')
+def assets_under_maintenance():
+    """Menampilkan daftar aset yang sedang dalam status 'Under Maintenance'."""
+    try:
+        # Ambil semua aset dengan status "Under Maintenance"
+        under_maintenance_assets = list(assets_collection.find({"status": "Under Maintenance"}))
+    except Exception as e:
+        print(f"Error fetching assets under maintenance: {e}")
+        under_maintenance_assets = []
+        
+    return render_template('assets_under_maintenance.html', assets=under_maintenance_assets)
 
 # 4. BUAT RUTE UNTUK MENAMBAH ASET (Create)
 @assets_bp.route('/add', methods=['GET', 'POST'])
@@ -124,3 +136,32 @@ def detail_asset(asset_id):
     except Exception as e:
         print(f"Error fetching asset detail: {e}")
         return "Error, ID aset tidak valid", 400
+    
+# 6. RUTE UNTUK UPDATE STATUS ATAU DATA ASET
+@assets_bp.route('/update_asset/<asset_id>', methods=['POST'])
+def update_asset(asset_id):
+    """Memperbarui data aset (misalnya status, lokasi, dll)."""
+    try:
+        new_status = request.form.get('status')
+        new_location = request.form.get('location')
+
+        update_data = {}
+        if new_status:
+            update_data["status"] = new_status
+        if new_location:
+            update_data["location"] = new_location
+
+        if update_data:
+            assets_collection.update_one(
+                {"_id": ObjectId(asset_id)},
+                {"$set": update_data}
+            )
+
+        # ✅ tampilkan alert sukses dengan flash message
+        from flask import flash
+        flash("Data aset berhasil diperbarui!", "success")
+    except Exception as e:
+        print(f"Error updating asset: {e}")
+        flash("Gagal memperbarui data aset.", "error")
+
+    return redirect(url_for('assets.detail_asset', asset_id=asset_id))
