@@ -12,9 +12,12 @@
             <th>Nama Tugas</th>
             <th>Tipe Aset</th>
             <th>Frekuensi (Per)</th>
+            <th>Dibuat/Diperbarui</th>
             <th>Jatuh Tempo Berikutnya</th>
+            <th>Status</th>
             <th>Terakhir Dilakukan</th>
-        </tr>
+            
+            </tr>
     </thead>
     <tbody>
         {% for schedule in schedules %}
@@ -22,14 +25,103 @@
             <td>{{ schedule.task_name }}</td>
             <td>{{ schedule.asset_type }}</td>
             <td>{{ schedule.frequency_days }} hari</td>
+            <td>
+                {{ schedule.last_updated.strftime('%Y-%m-%d') if schedule.last_updated else 'N/A' }}
+            </td>
             <td>{{ schedule.next_due_date.strftime('%Y-%m-%d') }}</td>
+            <td style="color: {{ schedule.status_color }}; font-weight: bold;">
+                {{ schedule.status_text }}
+            </td>
             <td>{{ schedule.last_completed.strftime('%Y-%m-%d') if schedule.last_completed else 'Belum pernah' }}</td>
-        </tr>
+            
+            
+            </tr>
         {% else %}
         <tr>
-            <td colspan="5">Belum ada jadwal perawatan.</td>
-        </tr>
+            <td colspan="7">Belum ada jadwal perawatan.</td>
+            </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<div id="customAlertOverlay"></div>
+<div id="customAlertDialog">
+    <div class="alert-header">
+        <span class="alert-icon">&#9888;</span> <h2>PERHATIAN</h2>
+    </div>
+    <div class="alert-body">
+        <p id="alertMessage"></p>
+    </div>
+    <div class="alert-footer">
+        <button id="closeAlertButton">Mengerti</button>
+    </div>
+</div>
+
+{% if urgent_items %}
+<script>
+    // Script modal Anda tetap sama, tidak perlu diubah
+    document.addEventListener("DOMContentLoaded", function() {
+        var overlay = document.getElementById('customAlertOverlay');
+        var dialogBox = document.getElementById('customAlertDialog');
+        var messageElement = document.getElementById('alertMessage');
+        var closeButton = document.getElementById('closeAlertButton');
+
+        function closeAlert() {
+            overlay.style.display = 'none';
+            dialogBox.style.display = 'none';
+        }
+
+        closeButton.addEventListener('click', closeAlert);
+        overlay.addEventListener('click', closeAlert);
+
+        var itemsList = {{ urgent_items | tojson | safe }};
+        var message = "Komponen berikut Akan/Sudah Jatuh Tempo:\n\n";
+        
+        itemsList.forEach(function(item) {
+            message += "- " + item + "\n";
+        });
+        
+        message += "\nMohon Segera Diganti.";
+        
+        messageElement.innerText = message;
+        
+        overlay.style.display = 'block';
+        dialogBox.style.display = 'block';
+    });
+</script>
+{% endif %}
+
+<style>
+    /* Style modal Anda tetap sama, tidak perlu diubah */
+    #customAlertOverlay {
+        display: none; position: fixed; top: 0; left: 0; width: 100%;
+        height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 1000;
+    }
+    #customAlertDialog {
+        display: none; position: fixed; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); width: 90%; max-width: 450px;
+        background-color: #ffffff; border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); z-index: 1001;
+        overflow: hidden; font-family: Arial, sans-serif;
+    }
+    .alert-header {
+        background-color: #f8d7da; color: #721c24; padding: 15px 20px;
+        display: flex; align-items: center;
+    }
+    .alert-header h2 { margin: 0; margin-left: 10px; font-size: 1.25rem; }
+    .alert-icon { font-size: 1.5rem; line-height: 1; }
+    .alert-body { padding: 20px; color: #333; }
+    .alert-body p { margin: 0; font-size: 1rem; white-space: pre-wrap; line-height: 1.5; }
+    .alert-footer {
+        background-color: #f9f9f9; padding: 15px 20px;
+        text-align: right; border-top: 1px solid #eee;
+    }
+    #closeAlertButton {
+        background-color: #d9534f; color: white; border: none;
+        padding: 10px 20px; border-radius: 5px; font-size: 1rem;
+        font-weight: bold; cursor: pointer; transition: background-color 0.2s;
+    }
+    #closeAlertButton:hover { background-color: #c9302c; }
+</style>
+
 {% endblock %}
