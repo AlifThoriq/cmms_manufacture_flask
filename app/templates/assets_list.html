@@ -1,10 +1,13 @@
 {% extends "base_layout.html" %}
 
 {% block content %}
-<h2>Manajemen Aset Mesin</h2>
-<a href="{{ url_for('assets.add_asset') }}" style="font-weight: bold; color: green;">
-    + Tambah Aset Baru
-</a>
+<h2 class="mb-4 border-start border-primary border-5 ps-3"><i class="fa fa-cogs me-2 text-primary"></i> Manajemen Aset Mesin</h2>
+
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('assets.add_asset') }}" class="btn btn-primary shadow-sm">
+        <i class="fa fa-plus me-1"></i> Tambah Aset Baru
+    </a>
+</div>
 
 <table>
     <thead>
@@ -13,25 +16,33 @@
             <th>Tipe</th>
             <th>Lokasi</th>
             <th>Status</th>
-            <th>Aksi</th>
+            <th class="text-center">Aksi</th>
         </tr>
     </thead>
     <tbody>
         {% for asset in assets %}
         <tr>
-            <td>{{ asset.asset_name }}</td>
+            <td><strong>{{ asset.asset_name }}</strong></td>
             <td>{{ asset.type }}</td>
             <td>{{ asset.location }}</td>
-            <td>{{ asset.status }}</td>
             <td>
-                <a href="{{ url_for('assets.detail_asset', asset_id=asset._id) }}">
-                    Lihat Detail
+                <!-- Badge Status Visual -->
+                {% set status_class = {
+                    'Active': 'bg-success',
+                    'Under Maintenance': 'bg-danger',
+                    'Offline': 'bg-secondary'
+                }.get(asset.status, 'bg-info') %}
+                <span class="badge {{ status_class }}">{{ asset.status }}</span>
+            </td>
+            <td class="text-center">
+                <a href="{{ url_for('assets.detail_asset', asset_id=asset._id) }}" class="action-btn action-edit">
+                    <i class="fa fa-search me-1"></i> Lihat Detail
                 </a>
             </td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="5">Belum ada aset. Silakan tambah aset baru.</td>
+            <td colspan="5" class="text-center text-muted fst-italic py-3">Belum ada aset terdaftar. Silakan tambah aset baru.</td>
         </tr>
         {% endfor %}
     </tbody>
