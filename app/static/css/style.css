@@ -226,3 +226,21 @@ footer {
 .back-btn:hover {
   background: #2980b9;
 }
+
+/* --------- FORM KHUSUS (TANPA SHADOW) --------- */
+.form-inline,
+.form-no-shadow {
+    background: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+.submit_maintenance {
+    background-color: #6c757d;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 14px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}

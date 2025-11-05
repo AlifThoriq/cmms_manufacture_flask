@@ -1,0 +1,54 @@
+{% extends "base_layout.html" %}
+
+{% block content %}
+<h2>Form Perawatan Rutin</h2>
+<p>Anda sedang melakukan perawatan untuk jadwal:
+    <strong>{{ schedule.task_name }} ({{ schedule.asset_type }})</strong>
+</p>
+
+<form method="POST" action="#">
+    
+    <!-- Tipe Laporan (Grayed Out dan tidak bisa diubah) -->
+    <div>
+        <label for="wo_type">Tipe Laporan:</label><br>
+        <input type="text" id="wo_type" name="wo_type" value="Perawatan Rutin" readonly
+               style="background-color: #f1f1f1; color: #555; border: 1px solid #ccc; padding: 6px 10px; border-radius: 5px; width: 100%;">
+    </div>
+    <br>
+
+    <!-- Nama Tugas otomatis dari jadwal -->
+    <div>
+        <label for="title">Nama Tugas:</label><br>
+        <input type="text" id="title" name="title" value="{{ schedule.task_name }}" readonly
+               style="background-color: #f1f1f1; color: #555; border: 1px solid #ccc; padding: 6px 10px; border-radius: 5px; width: 100%;">
+    </div>
+    <br>
+
+    <!-- Prioritas -->
+    <div>
+        <label for="priority">Prioritas:</label><br>
+        <select id="priority" name="priority" required
+                style="padding: 6px 10px; border-radius: 5px; border: 1px solid #ccc; width: 100%;">
+            <option value="Low">Rendah</option>
+            <option value="Medium">Medium</option>
+            <option value="High">Tinggi (Darurat)</option>
+        </select>
+    </div>
+    <br>
+
+    <!-- Deskripsi -->
+    <div>
+        <label for="description">Deskripsi / Keterangan:</label><br>
+        <textarea id="description" name="description" rows="4" cols="50" required
+                  placeholder="Tuliskan detail perawatan yang dilakukan..."
+                  style="padding: 8px 10px; border-radius: 5px; border: 1px solid #ccc; width: 100%;"></textarea>
+    </div>
+    <br>
+
+    <!-- Tombol Submit -->
+    <button type="submit"
+            class="submit_maintenance">
+        Submit Perawatan
+    </button>
+</form>
+{% endblock %}
