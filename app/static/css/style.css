@@ -3,80 +3,124 @@
    Dibuat untuk tampilan profesional berbasis Bootstrap
    ====================================================== */
 
+/* --------- GLOBAL VARIABLES --------- */
+:root {
+    --primary-color: #007bff; /* Biru Primer (lebih halus dari #0d6efd) */
+    --primary-dark: #0056b3;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --text-dark: #212529;
+    --text-light: #f8f9fa;
+    --bg-light: #f4f7f9; /* Latar belakang yang lebih menarik */
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 /* --------- GENERAL LAYOUT --------- */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #ffffff;
-    color: #212529;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
     margin: 0;
     padding: 0;
+    line-height: 1.6;
 }
 
 .container {
-    margin-top: 30px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+/* --------- TYPOGRAPHY & HEADERS --------- */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
 }
 
 /* --------- NAVBAR --------- */
 .navbar {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    padding: 1rem 1.5rem;
 }
 
 .navbar-brand {
-    font-weight: 600;
-    font-size: 1.3rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--text-light) !important;
 }
 
 .navbar-nav .nav-link {
-    color: #e0e0e0 !important;
-    transition: all 0.2s;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
 }
 
 .navbar-nav .nav-link:hover {
-    color: #ffffff !important;
-    text-decoration: underline;
+    color: var(--text-light) !important;
+    background-color: var(--primary-dark);
+    text-decoration: none;
 }
 
 /* --------- CARD & DASHBOARD --------- */
 .card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .card h6 {
-    font-weight: 600;
-    color: #0088ff;
+    font-weight: 500;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
 }
 
 .card h3 {
     font-weight: 700;
+    font-size: 2rem;
+    margin-top: 0;
+    color: var(--primary-dark);
 }
 
-/* Warna dashboard card */
-.border-primary { border-top: 4px solid #0d6efd !important; }
-.border-warning { border-top: 4px solid #ffc107 !important; }
-.border-info { border-top: 4px solid #0dcaf0 !important; }
-.border-danger { border-top: 4px solid #dc3545 !important; }
+/* Warna dashboard card dengan border di bawah (lebih modern) */
+.card-primary { border-bottom: 4px solid var(--primary-color); }
+.card-warning { border-bottom: 4px solid var(--warning-color); }
+.card-info { border-bottom: 4px solid var(--info-color); }
+.card-danger { border-bottom: 4px solid var(--danger-color); }
 
 .card-body a.btn {
-    margin-top: 10px;
+    margin-top: 15px;
     border-radius: 6px;
+    font-size: 0.95rem;
 }
 
-/* --------- BACK BUTTON --------- */
+/* Mengubah style lama untuk kompatibilitas */
+.border-primary { border-top: none !important; border-bottom: 4px solid var(--primary-color) !important; }
+.border-warning { border-top: none !important; border-bottom: 4px solid var(--warning-color) !important; }
+.border-info { border-top: none !important; border-bottom: 4px solid var(--info-color) !important; }
+.border-danger { border-top: none !important; border-bottom: 4px solid var(--danger-color) !important; }
+
+/* --------- BACK BUTTON & SECONDARY BUTTON --------- */
 .back-btn, .btn-secondary {
-    background-color: #6c757d;
+    background-color: var(--secondary-color);
     color: white;
-    border-radius: 6px;
-    padding: 6px 14px;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
     text-decoration: none;
-    transition: background-color 0.2s ease;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
 }
 
 .back-btn:hover, .btn-secondary:hover {
@@ -85,144 +129,179 @@ body {
 }
 
 /* --------- TABLE STYLE --------- */
+.table-responsive {
+    border-radius: 10px;
+    overflow-x: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
-    margin-top: 20px;
+    margin-top: 0;
     background-color: white;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 th {
-    background-color: #0d6efd;
-    color: #ffffff;
-    padding: 10px;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 12px 15px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-align: left;
 }
 
 td {
-    padding: 10px;
-    border-top: 1px solid #000000;
+    padding: 12px 15px;
+    border-top: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+tr:nth-child(even) {
+    background-color: #f8f9fa;
 }
 
 tr:hover {
-    background-color: #f1f3f5;
+    background-color: #e9ecef;
 }
 
 /* --------- FORM STYLE --------- */
 form {
     background-color: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 form label {
     font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+    display: block;
 }
 
 input[type="text"], input[type="number"], input[type="date"], select, textarea {
     width: 100%;
-    padding: 8px 10px;
-    margin: 6px 0 12px;
+    padding: 10px 12px;
+    margin: 6px 0 16px;
     border: 1px solid #ced4da;
     border-radius: 6px;
-    transition: border-color 0.2s;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #ffffff;
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: #0d6efd;
+    border-color: var(--primary-color);
     outline: none;
-    box-shadow: 0 0 4px rgba(13,110,253,0.25);
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+    background-color: #fff;
 }
 
-/* --------- BUTTON STYLE --------- */
+/* --------- BUTTON STYLE (General) --------- */
+.btn {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: all 0.3s ease;
+}
+
 .btn-primary {
-    background-color: #0d6efd;
+    background-color: var(--primary-color);
     border: none;
-    border-radius: 6px;
 }
 
 .btn-primary:hover {
-    background-color: #0b5ed7;
+    background-color: var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4);
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background-color: var(--danger-color);
     border: none;
-    border-radius: 6px;
 }
 
 .btn-danger:hover {
-    background-color: #bb2d3b;
+    background-color: #c82333;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
 }
 
 /* --------- TABLE ACTION BUTTONS --------- */
 .action-btn {
     display: inline-block;
     padding: 6px 10px;
-    border-radius: 4px;
+    border-radius: 6px;
     text-decoration: none;
     font-size: 0.9em;
+    font-weight: 500;
+    margin-right: 5px;
+    transition: opacity 0.2s;
 }
 
-.action-edit { background-color: #0dcaf0; color: white; }
-.action-delete { background-color: #dc3545; color: white; }
+.action-btn:hover {
+    opacity: 0.85;
+}
 
-.action-edit:hover { background-color: #0bb1d6; }
-.action-delete:hover { background-color: #bb2d3b; }
+.action-edit { 
+    background-color: var(--info-color); 
+    color: white; 
+}
+.action-delete { 
+    background-color: var(--danger-color); 
+    color: white; 
+}
 
 /* --------- AUDIT & REPORTING --------- */
 .report-section {
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 12px;
-    padding: 20px;
-    margin-top: 25px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    padding: 30px;
+    margin-top: 30px;
+    box-shadow: var(--card-shadow);
 }
 
 .report-section h4 {
-    border-bottom: 2px solid #0d6efd;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
+    border-bottom: 3px solid var(--primary-color);
+    color: var(--primary-dark);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
 }
 
 /* --------- FOOTER --------- */
 footer {
-    margin-top: 40px;
-    padding: 15px;
-    background-color: #212529;
-    color: white;
+    margin-top: 50px;
+    padding: 20px;
+    background-color: var(--text-dark);
+    color: var(--text-light);
     text-align: center;
-    border-top: 4px solid #0d6efd;
+    border-top: 5px solid var(--primary-color);
+    font-size: 0.9rem;
 }
 
 /* --------- RESPONSIVE --------- */
 @media (max-width: 768px) {
+    .container {
+        margin-top: 20px;
+        padding: 0 15px;
+    }
     .card h3 {
         font-size: 1.5rem;
     }
-    nav a {
-        display: block;
-        margin-bottom: 8px;
+    .navbar {
+        padding: 0.75rem 1rem;
     }
-    table {
-        font-size: 0.9rem;
+    th, td {
+        padding: 10px 8px;
     }
-}
-.back-btn {
-  display: inline-block;
-  background: #3498db;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: 0.2s;
-}
-.back-btn:hover {
-  background: #2980b9;
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
 }

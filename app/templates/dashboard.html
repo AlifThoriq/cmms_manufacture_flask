@@ -1,76 +1,167 @@
 {% extends "base_layout.html" %}
 {% block content %}
 
-<h2 class="mb-4"><i class="fa fa-chart-line text-primary"></i> Dashboard Laporan CMMS</h2>
+<h2 class="mb-5 border-start border-primary border-5 ps-3">
+  <i class="fa fa-chart-line me-2 text-primary"></i> Dashboard Laporan CMMS
+</h2>
 
 <div class="row g-4">
-  <div class="col-md-3">
-    <div class="card border-primary text-center">
+  <!-- Card 1: Total Aset -->
+  <div class="col-lg-3 col-md-6">
+    <div class="card card-primary text-center">
       <div class="card-body">
-        <h6>Total Aset</h6>
-        <h3>{{ stats.get('total_assets', 0) }}</h3>
-        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-primary btn-sm mt-2">Lihat Detail</a>
+        <h6>TOTAL ASET</h6>
+        <h3 class="text-primary">{{ stats.get('total_assets', 0) }}</h3>
+        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-primary btn-sm mt-2">
+          Lihat Detail <i class="fa fa-arrow-right"></i>
+        </a>
       </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="card border-danger text-center">
+
+  <!-- Card 2: Aset Dalam Perbaikan -->
+  <div class="col-lg-3 col-md-6">
+    <div class="card card-danger text-center">
       <div class="card-body">
-        <h6>Aset Dalam Perbaikan</h6>
-        <h3>{{ stats.get('assets_under_maintenance', 0) }}</h3>
-        <a href="{{ url_for('assets.assets_under_maintenance') }}" class="btn btn-outline-danger btn-sm mt-2">Lihat Detail</a>
+        <h6>ASET DALAM PERBAIKAN</h6>
+        <h3 class="text-danger">{{ stats.get('assets_under_maintenance', 0) }}</h3>
+        <a href="{{ url_for('assets.assets_under_maintenance') }}" class="btn btn-danger btn-sm mt-2">
+          Lihat Detail <i class="fa fa-exclamation-triangle"></i>
+        </a>
       </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="card border-warning text-center">
+
+  <!-- Card 3: WO Aktif -->
+  <div class="col-lg-3 col-md-6">
+    <div class="card card-warning text-center">
       <div class="card-body">
-        <h6>WO Aktif (Open)</h6>
+        <h6>WO AKTIF (OPEN)</h6>
         <h3 class="text-warning">{{ stats.get('wo_open', 0) }}</h3>
-        <a href="{{ url_for('work_orders.list_work_orders') }}" class="btn btn-outline-warning btn-sm mt-2">Lihat Detail</a>
+        <a href="{{ url_for('work_orders.list_work_orders') }}" class="btn btn-warning btn-sm mt-2 text-dark">
+          Lihat Detail <i class="fa fa-folder-open"></i>
+        </a>
       </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="card border-info text-center">
+
+  <!-- Card 4: Total Part Stok Tipis -->
+  <div class="col-lg-3 col-md-6">
+    <div class="card card-info text-center">
       <div class="card-body">
-        <h6>Total Part Stok Tipis</h6>
+        <h6>TOTAL PART STOK TIPIS</h6>
         <h3 class="text-info">{{ stats.get('low_stock_count', 0) }}</h3>
-        <a href="{{ url_for('inventory.low_stock_inventory') }}" class="btn btn-outline-info btn-sm mt-2">Lihat Detail</a>
+        <a href="{{ url_for('inventory.low_stock_inventory') }}" class="btn btn-info btn-sm mt-2 text-white">
+          Lihat Detail <i class="fa fa-layer-group"></i>
+        </a>
       </div>
     </div>
   </div>
 </div>
 
-<hr class="my-4">
+<hr class="my-5">
 
-<div class="row">
+<!-- Grafik Ringkasan Statistik -->
+<div class="row mb-5">
+  <div class="col-md-12">
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fa fa-chart-bar me-2"></i> Grafik Ringkasan Statistik CMMS</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="cmmsChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bagian Laporan dan Analisis -->
+<div class="row g-4">
   <div class="col-md-6">
     <div class="report-section">
-      <h4><i class="fa fa-wrench text-primary"></i> Aset Paling Sering Rusak (Top 3)</h4>
-      <p>Berdasarkan jumlah laporan kerusakan.</p>
-      <ol>
+      <h4><i class="fa fa-tools me-2 text-primary"></i> Aset Paling Sering Rusak (Top 3)</h4>
+      <p class="text-secondary mb-3">Analisis berdasarkan frekuensi laporan kerusakan untuk perbaikan preventif.</p>
+      <ol class="list-group list-group-flush">
         {% for asset in stats.get('top_problem_assets', []) %}
-          <li><strong>{{ asset._id }}</strong> - {{ asset.count }} kali</li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong class="text-break">{{ asset._id }}</strong>
+            <span class="badge bg-danger rounded-pill">{{ asset.count }} kali</span>
+          </li>
         {% else %}
-          <li>Belum ada data insiden.</li>
+          <li class="list-group-item text-muted">Belum ada data insiden yang tercatat.</li>
         {% endfor %}
       </ol>
     </div>
   </div>
+
   <div class="col-md-6">
     <div class="report-section">
-      <h4><i class="fa fa-box-open text-danger"></i> Spare Part Stok Tipis</h4>
-      <p>Part dengan stok di bawah batas minimum.</p>
-      <ul>
+      <h4><i class="fa fa-dolly me-2 text-danger"></i> Spare Part Stok Tipis</h4>
+      <p class="text-secondary mb-3">Daftar part yang memerlukan pemesanan ulang (Re-Order Point Alert).</p>
+      <ul class="list-group list-group-flush">
         {% for part in stats.get('inventory_low_stock', []) %}
-          <li>{{ part.part_name }} — (Stok: {{ part.stock_on_hand }})</li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span class="fw-medium text-break">{{ part.part_name }}</span>
+            <span class="badge bg-warning text-dark rounded-pill">Stok: {{ part.stock_on_hand }}</span>
+          </li>
         {% else %}
-          <li>Semua stok aman.</li>
+          <li class="list-group-item text-muted">Semua stok spare part di atas batas minimum.</li>
         {% endfor %}
       </ul>
     </div>
   </div>
 </div>
+
+<!-- SCRIPT GRAFIK -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('cmmsChart').getContext('2d');
+  const cmmsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Total Aset', 'Aset Dalam Perbaikan', 'WO Aktif (Open)', 'Part Stok Tipis'],
+      datasets: [{
+        label: 'Jumlah Data',
+        data: [
+          {{ stats.get('total_assets', 0) }},
+          {{ stats.get('assets_under_maintenance', 0) }},
+          {{ stats.get('wo_open', 0) }},
+          {{ stats.get('low_stock_count', 0) }}
+        ],
+        backgroundColor: [
+          'rgba(13, 110, 253, 0.6)',
+          'rgba(220, 53, 69, 0.6)',
+          'rgba(255, 193, 7, 0.6)',
+          'rgba(23, 162, 184, 0.6)'
+        ],
+        borderColor: [
+          'rgba(13, 110, 253, 1)',
+          'rgba(220, 53, 69, 1)',
+          'rgba(255, 193, 7, 1)',
+          'rgba(23, 162, 184, 1)'
+        ],
+        borderWidth: 1,
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Visualisasi Statistik Utama CMMS',
+          font: { size: 16 }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      }
+    }
+  });
+</script>
 
 {% endblock %}
