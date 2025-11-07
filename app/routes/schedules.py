@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from app.utils.db import schedules_collection, assets_collection
 import datetime
+from bson.objectid import ObjectId
+from flask import abort
+
 
 # 1. DEFINISIKAN BLUEPRINT
 schedules_bp = Blueprint('schedules', __name__, template_folder='templates')
@@ -89,3 +92,65 @@ def add_schedule():
     # Jika method GET, ambil daftar tipe aset untuk dropdown
     asset_types = ["All"] + assets_collection.distinct("type")
     return render_template('schedule_form.html', asset_types=asset_types)
+
+@schedules_bp.route('/detail/<schedule_id>')
+def detail_schedule(schedule_id):
+    """Menampilkan detail dari satu jadwal perawatan preventif."""
+    try:
+        schedule = schedules_collection.find_one({"_id": ObjectId(schedule_id)})
+        if not schedule:
+            abort(404, description="Jadwal tidak ditemukan.")
+    except Exception as e:
+        print(f"Error fetching schedule detail: {e}")
+        abort(500, description="Terjadi kesalahan pada server.")
+    
+    # Format tanggal agar tidak error di template
+    for field in ["last_updated", "next_due_date", "last_completed"]:
+        if field in schedule and schedule[field]:
+            schedule[field] = schedule[field].astimezone(datetime.timezone(datetime.timedelta(hours=7)))  # Ubah ke WIB jika perlu
+    
+    return render_template("schedule_detail.html", schedule=schedule)
+
+@schedules_bp.route('/delete/<schedule_id>', methods=['POST'])
+def delete_schedule(schedule_id):
+    """Menghapus jadwal perawatan berdasarkan ID."""
+    try:
+        result = schedules_collection.delete_one({"_id": ObjectId(schedule_id)})
+        if result.deleted_count == 0:
+            abort(404, description="Jadwal tidak ditemukan atau sudah dihapus.")
+    except Exception as e:
+        print(f"Error deleting schedule: {e}")
+        abort(500, description="Terjadi kesalahan saat menghapus jadwal.")
+    
+    return redirect(url_for('schedules.list_schedules'))
+
+
+@schedules_bp.route('/maintenance/<schedule_id>', methods=['GET', 'POST'])
+def schedule_maintenance(schedule_id):
+    try:
+        schedule = schedules_collection.find_one({"_id": ObjectId(schedule_id)})
+        if not schedule:
+            abort(404, description="Jadwal tidak ditemukan.")
+    except Exception as e:
+        print(f"Error fetching schedule for maintenance: {e}")
+        abort(500, description="Terjadi kesalahan saat mengambil data jadwal.")
+
+    if request.method == 'POST':
+        priority = request.form.get('priority')
+        description = request.form.get('description')
+
+        current_time = datetime.datetime.now(datetime.timezone.utc)
+        schedules_collection.update_one(
+            {"_id": ObjectId(schedule_id)},
+            {"$set": {
+                "last_completed": current_time,
+                "last_updated": current_time,
+                "last_description": description,
+                "last_priority": priority
+            }}
+        )
+
+        return redirect(url_for('schedules.list_schedules'))
+
+    return render_template('schedule_form_maintenance.html', schedule=schedule)
+

@@ -16,8 +16,8 @@
             <th>Jatuh Tempo Berikutnya</th>
             <th>Status</th>
             <th>Terakhir Dilakukan</th>
-            
-            </tr>
+            <th>Aksi</th> <!-- Tambahan baru -->
+        </tr>
     </thead>
     <tbody>
         {% for schedule in schedules %}
@@ -33,13 +33,15 @@
                 {{ schedule.status_text }}
             </td>
             <td>{{ schedule.last_completed.strftime('%Y-%m-%d') if schedule.last_completed else 'Belum pernah' }}</td>
-            
-            
-            </tr>
+            <td>
+                <a href="{{ url_for('schedules.detail_schedule', schedule_id=schedule['_id']|string) }}"
+                   style="color: blue; font-weight: bold;">Lihat Detail</a>
+            </td>
+        </tr>
         {% else %}
         <tr>
-            <td colspan="7">Belum ada jadwal perawatan.</td>
-            </tr>
+            <td colspan="8">Belum ada jadwal perawatan.</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
