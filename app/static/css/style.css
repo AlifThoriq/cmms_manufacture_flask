@@ -3,6 +3,14 @@
    Dibuat untuk tampilan profesional berbasis Bootstrap
    ====================================================== */
 
+/* --------- GENERAL LAYOUT --------- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ffffff;
+    color: #212529;
+    margin: 0;
+    padding: 0;
+   
 /* --------- FORM KHUSUS (TANPA SHADOW) --------- */
 .form-inline,
 .form-no-shadow {
