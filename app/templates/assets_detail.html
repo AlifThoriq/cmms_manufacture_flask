@@ -14,7 +14,7 @@
         border-radius: 0.25rem;
     }
 
-    /* Warna baris tabel */
+    /* Warna baris tabel (Dari Master) */
     .status-good-row { background-color: #f7fcf9; } 
     .status-warning-row { background-color: #fff9e6; } 
     .status-critical-row { 
@@ -23,23 +23,24 @@
         border-left: 5px solid #dc3545; 
     }
     
+    /* Kategori Statis (Logika Asli Anda) */
     .category-static {
         font-weight: 600;
         color: #3f4a62;
     }
 
-    /* Opsi Status */
+    /* Opsi Status (Dari Master) */
     .status-option-critical { background-color: #f8d7da; color: #842029; font-weight: bold; }
     .status-option-warning { background-color: #fff3cd; color: #664d03; }
     .status-option-good { background-color: #d1e7dd; color: #0f5132; }
     .component-status { background-color: #fff; }
 
-    /* Overall Status Text */
+    /* Overall Status Text (Dari Master) */
     .overall-status-critical { color: #dc3545; font-weight: bold; }
     .overall-status-warning { color: #ffc107; font-weight: bold; }
     .overall-status-good { color: #198754; font-weight: bold; }
 
-    /* Custom card header dari UI temanmu */
+    /* Styling Tambahan (dari punyafira) */
     .card-header {
         font-weight: 600;
         color: #333;
@@ -121,7 +122,7 @@
                 <strong><i class="fa fa-edit me-1"></i> Perbarui Status Aset</strong>
             </div>
             <div class="card-body">
-                <form action="{{ url_for('assets.update_asset', asset_id=asset._id) }}" method="POST">
+                <form action="{{ url_for('assets.update_asset', asset_id=asset._id | string) }}" method="POST">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-5">
                             <label for="status" class="form-label fw-bold">Status Utama</label>
@@ -198,7 +199,7 @@
                         <tr>
                             <th style="width: 10%;">ID</th>
                             <th style="width: 30%;">Nama Komponen</th>
-                            <th style="width: 25%;">Kategori (Bisa Ubah)</th>
+                            <th style="width: 25%;">Kategori Maintenance</th>
                             <th style="width: 30%;">Status Komponen</th>
                         </tr>
                     </thead>
@@ -215,15 +216,7 @@
                             <td><strong>{{ comp.name }}</strong></td>
                             
                             <td>
-                                <select class="form-select form-select-sm" 
-                                        data-asset-id="{{ asset._id | string }}" 
-                                        data-component-id="{{ comp.component_id }}" 
-                                        data-field="category"
-                                        onchange="updateComponent(this)">
-                                    {% for cat in maintenance_categories %}
-                                        <option value="{{ cat }}" {% if comp.category == cat %}selected{% endif %}>{{ cat }}</option>
-                                    {% endfor %}
-                                </select>
+                                <span class="category-static">{{ comp.category }}</span>
                             </td>
                             
                             <td>
@@ -255,69 +248,82 @@
 </div>
 
 <script>
-    // PENTING: Filter | string wajib ada
     const CURRENT_ASSET_ID = '{{ asset._id | string }}';
-    // URL Template harus sesuai dengan route Python yang kita perbaiki
-    const UPDATE_URL_TEMPLATE = "/assets/component/update/__ASSET_ID__/__COMPONENT_ID__";
+    const UPDATE_URL_TEMPLATE = "{{ url_for('assets.update_component_status', asset_id='__ASSET_ID__', component_id='__COMPONENT_ID__') }}";
     
+    // Peta kelas untuk pewarnaan baris (HARUS SAMA DENGAN JINJA)
     const STATUS_ROW_MAP = {
         'Critical / Down': 'status-critical-row',
         'Warning / Requires Attention': 'status-warning-row',
         'Good / Operational': 'status-good-row'
     };
+
     const allRowStatusClasses = Object.values(STATUS_ROW_MAP);
 
     function updateComponent(selectElement) {
         const componentId = selectElement.getAttribute('data-component-id');
-        const field = selectElement.getAttribute('data-field'); 
+        const field = selectElement.getAttribute('data-field');
         const value = selectElement.value;
         
-        // Membangun URL manual agar lebih aman
-        let url = UPDATE_URL_TEMPLATE
-                    .replace('__ASSET_ID__', CURRENT_ASSET_ID) 
-                    .replace('__COMPONENT_ID__', componentId);
+        // Logika Guard Asli Anda: Hanya izinkan update 'status'
+        if (field !== 'status') {
+            console.error('Hanya status yang dapat diupdate dari tampilan ini.');
+            return;
+        }
+
+        const url = UPDATE_URL_TEMPLATE
+                        .replace('__ASSET_ID__', CURRENT_ASSET_ID)
+                        .replace('__COMPONENT_ID__', componentId);
 
         const formData = new FormData();
-        formData.append(field, value); // Field bisa 'status' atau 'category'
+        formData.append(field, value);
 
         const row = document.getElementById(`row-${componentId}`);
         const originalBg = row.style.backgroundColor;
         
-        // Efek visual loading
-        row.style.backgroundColor = '#fff3cd'; 
+        row.style.backgroundColor = '#fff3cd';
 
         fetch(url, {
             method: 'POST',
             body: formData
         })
         .then(response => {
-             if (!response.ok) throw new Error(`Server error: ${response.status}`);
-             return response.json();
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            return response.json();
         })
         .then(data => {
-            row.style.backgroundColor = originalBg; 
+            row.style.backgroundColor = originalBg;
             
             if (data.status === 'success') {
-                // Jika yang diubah adalah STATUS, update warna baris
-                if (field === 'status') {
-                    const newRowClass = STATUS_ROW_MAP[value] || 'status-good-row';
-                    allRowStatusClasses.forEach(cls => row.classList.remove(cls));
-                    row.classList.add(newRowClass);
-                    selectElement.className = `form-select form-select-sm component-status ${newRowClass}`;
-                }
+                
+                // 1. UPDATE WARNA BARIS SECARA VISUAL
+                const newRowClass = STATUS_ROW_MAP[value] || 'status-good-row';
+                allRowStatusClasses.forEach(cls => row.classList.remove(cls));
+                row.classList.add(newRowClass);
+                
+                // Ganti class pada elemen select itu sendiri
+                selectElement.className = `form-select form-select-sm component-status ${newRowClass}`;
 
-                // Alert sukses (Gabungan SweetAlert temanmu)
+                // 2. Notifikasi: Sarankan refresh untuk update Overall Status & Sorting
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message,
-                        timer: 2000,
-                        showConfirmButton: false
+                        title: 'Status Diperbarui!',
+                        text: data.message + '. Silakan refresh halaman untuk melihat update "Kondisi Komponen" dan urutan list.',
+                        timer: 3500
                     });
                 }
             } else {
-                throw new Error(data.message);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal Update!',
+                        text: data.message,
+                        timer: 3000
+                    });
+                }
             }
         })
         .catch(error => {
@@ -326,11 +332,10 @@
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Gagal Update',
-                    text: error.message
+                    title: 'Koneksi Gagal',
+                    text: 'Gagal mengirim update ke server. Cek console log atau pastikan server Flask berjalan.',
+                    timer: 3000
                 });
-            } else {
-                alert('Gagal update: ' + error.message);
             }
         });
     }
