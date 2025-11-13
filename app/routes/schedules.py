@@ -125,6 +125,9 @@ def delete_schedule(schedule_id):
     return redirect(url_for('schedules.list_schedules'))
 
 
+from app.utils.db import schedules_collection, assets_collection, work_orders_collection
+# pastikan kamu import work_orders_collection dari utils.db
+
 @schedules_bp.route('/maintenance/<schedule_id>', methods=['GET', 'POST'])
 def schedule_maintenance(schedule_id):
     try:
@@ -140,6 +143,8 @@ def schedule_maintenance(schedule_id):
         description = request.form.get('description')
 
         current_time = datetime.datetime.now(datetime.timezone.utc)
+
+        # === 1️⃣ Update status jadwal ===
         schedules_collection.update_one(
             {"_id": ObjectId(schedule_id)},
             {"$set": {
@@ -150,7 +155,36 @@ def schedule_maintenance(schedule_id):
             }}
         )
 
-        return redirect(url_for('schedules.list_schedules'))
+        # === 2️⃣ Ambil informasi aset (optional) ===
+        asset_name = schedule.get('asset_type', 'Tidak Diketahui')
+
+        # === 3️⃣ Buat entri baru ke Work Order ===
+        new_work_order = {
+            "asset_id": None,  # karena WO ini dari jadwal, tidak terkait langsung dgn aset collection
+            "asset_name": asset_name,
+            "type": "Perawatan Rutin",  # otomatis, sesuai permintaan
+            "title": schedule['task_name'],
+            "description": description,
+            "priority": priority,
+            "status": "Open",
+            "created_at": current_time,
+            "history_log": [
+                {
+                    "timestamp": current_time,
+                    "user": "System",  # atau Operator jika ingin diseragamkan
+                    "action": f"Work Order otomatis dibuat dari jadwal '{schedule['task_name']}'"
+                }
+            ]
+        }
+
+        try:
+            work_orders_collection.insert_one(new_work_order)
+        except Exception as e:
+            print(f"Error inserting work order: {e}")
+
+        # === 4️⃣ Redirect ke daftar WO ===
+        return redirect(url_for('work_orders.list_work_orders'))
 
     return render_template('schedule_form_maintenance.html', schedule=schedule)
+
 
