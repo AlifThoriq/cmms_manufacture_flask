@@ -46,11 +46,7 @@
   <main class="flex-grow-1">
     <div class="container mt-4">
       <!-- Tombol Kembali: Menggunakan kelas back-btn dari CSS yang baru -->
-      {% if request.referrer %}
-        <a href="{{ request.referrer }}" class="back-btn mb-3 d-inline-flex align-items-center">
-          <i class="fa fa-arrow-left me-2"></i> Kembali
-        </a>
-      {% endif %}
+      {% block page_header %}{% endblock %}
 
       <!-- Flash Messages -->
       {% with messages = get_flashed_messages(with_categories=true) %}
