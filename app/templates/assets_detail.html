@@ -1,62 +1,122 @@
 {% extends "base_layout.html" %}
 
 {% block content %}
+<style>
+    /* Styling gabungan */
+    .table .component-status-badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.85em;
+        font-weight: 600;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-radius: 0.25rem;
+    }
 
-<!-- 1. HEADER & ACTION BUTTONS -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+    /* Warna baris tabel */
+    .status-good-row { background-color: #f7fcf9; } 
+    .status-warning-row { background-color: #fff9e6; } 
+    .status-critical-row { 
+        background-color: #fcebeb !important;
+        font-weight: bold; 
+        border-left: 5px solid #dc3545; 
+    }
+    
+    .category-static {
+        font-weight: 600;
+        color: #3f4a62;
+    }
+
+    /* Opsi Status */
+    .status-option-critical { background-color: #f8d7da; color: #842029; font-weight: bold; }
+    .status-option-warning { background-color: #fff3cd; color: #664d03; }
+    .status-option-good { background-color: #d1e7dd; color: #0f5132; }
+    .component-status { background-color: #fff; }
+
+    /* Overall Status Text */
+    .overall-status-critical { color: #dc3545; font-weight: bold; }
+    .overall-status-warning { color: #ffc107; font-weight: bold; }
+    .overall-status-good { color: #198754; font-weight: bold; }
+
+    /* Custom card header dari UI temanmu */
+    .card-header {
+        font-weight: 600;
+        color: #333;
+    }
+    .form-select-sm {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
     <div>
-        <h2 class="mb-2">
+        <h2 class="mb-1 text-primary">
             <i class="fa fa-hdd me-2"></i> {{ asset.asset_name }}
         </h2>
         <p class="text-muted mb-0">ID: <strong>{{ asset._id }}</strong> | Tipe: <strong>{{ asset.type }}</strong></p>
     </div>
     <div>
-        <!-- Tombol untuk membuat Work Order langsung dari Aset -->
-        <a href="{{ url_for('work_orders.create_work_order', asset_id=asset._id) }}" 
-            class="btn btn-danger">
+        <a href="{{ url_for('work_orders.create_work_order', asset_id=asset._id | string) }}" 
+           class="btn btn-danger shadow-sm">
             <i class="fa fa-fire-extinguisher me-1"></i> Laporkan Kerusakan
         </a>
     </div>
 </div>
 
 <div class="row g-4">
-    <!-- Kolom Kiri: Informasi Aset & Gambar -->
     <div class="col-lg-4">
-        <div class="card h-100">
+        <div class="card h-100 shadow-sm">
             <div class="card-header bg-light border-bottom">
-                <strong><i class="fa fa-info-circle me-1"></i> Informasi Umum Mesin</strong>
+                <i class="fa fa-info-circle me-1"></i> Informasi Umum Mesin
             </div>
-            <img src="{{ asset.image_url }}" 
+            
+            <img src="{{ url_for('static', filename=image_url.split('/static/')[1]) if image_url and image_url.startswith('/static/') else image_url }}" 
                  class="card-img-top p-3" 
                  alt="Gambar Mesin {{ asset.asset_name }}" 
-                 onerror="this.onerror=null;this.src='https://placehold.co/600x400/e1e4e8/2c3e50?text=Image+Not+Found'" 
+                 onerror="this.onerror=null;this.src='https://placehold.co/600x400/007bff/ffffff?text=Image+Not+Found'" 
                  style="height: 250px; object-fit: cover; border-radius: 8px;">
+                 
             <div class="card-body">
                 <div class="mb-3">
                     <small class="text-muted d-block mb-1">Lokasi</small>
                     <strong>{{ asset.location }}</strong>
                 </div>
+
                 <div class="mb-3">
                     <small class="text-muted d-block mb-1">Status Operasi</small>
                     {% set status_badge = {
-                        'Active': 'badge-success',
-                        'Under Maintenance': 'badge-danger',
+                        'Operational': 'bg-success',
+                        'Active': 'bg-success',
+                        'Under Maintenance': 'bg-danger',
                         'Offline': 'bg-secondary'
-                    }.get(asset.status, 'bg-secondary') %}
-                    <span class="badge {{ status_badge }}">{{ asset.status }}</span>
+                    }.get(asset.status, 'bg-info') %}
+                    <span class="badge {{ status_badge }} p-2">{{ asset.status }}</span>
                 </div>
+
                 <div>
-                    <small class="text-muted d-block mb-1">Total Jam Pakai</small>
-                    <strong class="h4">{{ asset.total_runtime_hours | default(0) }}</strong> <span class="text-muted">jam</span>
+                    <small class="text-muted d-block mb-1">Kondisi Komponen</small>
+                    {% set overall_class = {
+                        'Critical / Down': 'overall-status-critical',
+                        'Warning / Requires Attention': 'overall-status-warning'
+                    }.get(overall_component_status, 'overall-status-good') %}
+
+                    <span class="{{ overall_class }} fs-5">
+                        {{ overall_component_status }} 
+                        <i class="fa fa-exclamation-triangle" {% if 'Critical' in overall_component_status %} style="color: #dc3545;" {% elif 'Warning' in overall_component_status %} style="color: #ffc107;" {% endif %}></i>
+                    </span>
+                </div>
+                
+                <div class="mt-3 pt-3 border-top">
+                     <small class="text-muted">Runtime:</small> <strong>{{ asset.total_runtime_hours | default(0) }} Jam</strong>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Kolom Kanan: Update Aset & Jadwal -->
     <div class="col-lg-8">
-        <!-- Form Update Aset Utama -->
-        <div class="card mb-4">
+        <div class="card shadow-sm mb-4">
             <div class="card-header bg-light border-bottom">
                 <strong><i class="fa fa-edit me-1"></i> Perbarui Status Aset</strong>
             </div>
@@ -64,20 +124,20 @@
                 <form action="{{ url_for('assets.update_asset', asset_id=asset._id) }}" method="POST">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-5">
-                            <label for="status" class="form-label"><strong>Status Utama</strong></label>
+                            <label for="status" class="form-label fw-bold">Status Utama</label>
                             <select name="status" id="status" class="form-select">
-                                <option value="Active" {% if asset.status == 'Active' %}selected{% endif %}>Active</option>
+                                <option value="Operational" {% if asset.status == 'Operational' %}selected{% endif %}>Operational</option>
                                 <option value="Under Maintenance" {% if asset.status == 'Under Maintenance' %}selected{% endif %}>Under Maintenance</option>
                                 <option value="Offline" {% if asset.status == 'Offline' %}selected{% endif %}>Offline</option>
                             </select>
                         </div>
                         <div class="col-md-5">
-                            <label for="location" class="form-label"><strong>Lokasi</strong></label>
+                            <label for="location" class="form-label fw-bold">Lokasi</label>
                             <input type="text" name="location" id="location" class="form-control" value="{{ asset.location }}">
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fa fa-sync-alt"></i> Update
+                                <i class="fa fa-sync-alt"></i>
                             </button>
                         </div>
                     </div>
@@ -85,19 +145,18 @@
             </div>
         </div>
         
-        <!-- Jadwal Rutin -->
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header bg-light border-bottom">
                 <strong><i class="fa fa-calendar-alt me-1"></i> Jadwal Perawatan (Rutin)</strong>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead>
+                        <thead class="bg-light">
                             <tr>
                                 <th>Nama Tugas</th>
                                 <th>Frekuensi</th>
-                                <th>Jatuh Tempo Berikutnya</th>
+                                <th>Jatuh Tempo</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,7 +169,7 @@
                             {% else %}
                             <tr>
                                 <td colspan="3" class="text-center text-muted py-3">
-                                    <em>Tidak ada jadwal rutin yang cocok untuk tipe aset ini.</em>
+                                    <em>Tidak ada jadwal rutin.</em>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -122,36 +181,42 @@
     </div>
 </div>
 
-<!-- 2. DETAIL KOMPONEN INTERAKTIF (LIVE UPDATE) -->
-<div class="mt-5 pt-4" style="border-top: 1px solid var(--border-light);">
+<div class="mt-5 pt-4" style="border-top: 1px solid #dee2e6;">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h3 class="mb-1"><i class="fa fa-list-check me-2"></i> Daftar Komponen Kritis</h3>
-            <p class="text-muted small mb-0">Status dan Kategori dapat diperbarui secara real-time untuk memicu Work Order</p>
+            <h3 class="mb-1"><i class="fa fa-list-check me-2 text-primary"></i> Daftar Komponen Kritis</h3>
+            <p class="text-muted small mb-0">Update status komponen secara *real-time*. Status 'Critical' akan memicu laporan.</p>
         </div>
-        <span class="badge bg-secondary">{{ asset.components|length }} komponen</span>
+        <span class="badge bg-secondary rounded-pill">{{ asset.components|length }} komponen</span>
     </div>
 
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
                         <tr>
-                            <th style="width: 15%;">ID</th>
+                            <th style="width: 10%;">ID</th>
                             <th style="width: 30%;">Nama Komponen</th>
-                            <th style="width: 25%;">Kategori Maintenance</th>
+                            <th style="width: 25%;">Kategori (Bisa Ubah)</th>
                             <th style="width: 30%;">Status Komponen</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for comp in asset.components %}
-                        <tr id="row-{{ comp.component_id }}">
-                            <td><span class="badge bg-secondary">{{ comp.component_id }}</span></td>
+                        
+                        {% set row_class = {
+                            'Critical / Down': 'status-critical-row',
+                            'Warning / Requires Attention': 'status-warning-row'
+                        }.get(comp.status, 'status-good-row') %}
+                        
+                        <tr id="row-{{ comp.component_id }}" class="{{ row_class }}">
+                            <td><span class="badge bg-primary">{{ comp.component_id }}</span></td>
                             <td><strong>{{ comp.name }}</strong></td>
+                            
                             <td>
-                                <select class="form-select form-select-sm component-category" 
-                                        data-asset-id="{{ asset._id }}" 
+                                <select class="form-select form-select-sm" 
+                                        data-asset-id="{{ asset._id | string }}" 
                                         data-component-id="{{ comp.component_id }}" 
                                         data-field="category"
                                         onchange="updateComponent(this)">
@@ -160,15 +225,21 @@
                                     {% endfor %}
                                 </select>
                             </td>
+                            
                             <td>
-                                <select class="form-select form-select-sm component-status" 
-                                        data-asset-id="{{ asset._id }}" 
+                                <select class="form-select form-select-sm component-status {{ row_class }}" 
+                                        data-asset-id="{{ asset._id | string }}" 
                                         data-component-id="{{ comp.component_id }}"
                                         data-field="status"
                                         onchange="updateComponent(this)">
                                     {% for status in component_statuses %}
-                                        <option value="{{ status }}" 
-                                                {% if comp.status == status %}selected{% endif %}>
+                                        {% set option_class = '' %}
+                                        {% if 'Critical' in status %} {% set option_class = 'status-option-critical' %}
+                                        {% elif 'Warning' in status %} {% set option_class = 'status-option-warning' %}
+                                        {% elif 'Good' in status %} {% set option_class = 'status-option-good' %}
+                                        {% endif %}
+                                        
+                                        <option value="{{ status }}" {% if comp.status == status %}selected{% endif %} class="{{ option_class }}">
                                             {{ status }}
                                         </option>
                                     {% endfor %}
@@ -183,73 +254,85 @@
     </div>
 </div>
 
-<!-- JavaScript untuk Live Update Komponen -->
 <script>
+    // PENTING: Filter | string wajib ada
+    const CURRENT_ASSET_ID = '{{ asset._id | string }}';
+    // URL Template harus sesuai dengan route Python yang kita perbaiki
+    const UPDATE_URL_TEMPLATE = "/assets/component/update/__ASSET_ID__/__COMPONENT_ID__";
+    
+    const STATUS_ROW_MAP = {
+        'Critical / Down': 'status-critical-row',
+        'Warning / Requires Attention': 'status-warning-row',
+        'Good / Operational': 'status-good-row'
+    };
+    const allRowStatusClasses = Object.values(STATUS_ROW_MAP);
+
     function updateComponent(selectElement) {
-        const assetId = selectElement.getAttribute('data-asset-id');
         const componentId = selectElement.getAttribute('data-component-id');
-        const field = selectElement.getAttribute('data-field');
+        const field = selectElement.getAttribute('data-field'); 
         const value = selectElement.value;
-        const url = `{{ url_for('assets.update_component_status', asset_id='DUMMY_ASSET_ID', component_id='DUMMY_COMPONENT_ID') }}`
-                    .replace('DUMMY_ASSET_ID', assetId)
-                    .replace('DUMMY_COMPONENT_ID', componentId);
+        
+        // Membangun URL manual agar lebih aman
+        let url = UPDATE_URL_TEMPLATE
+                    .replace('__ASSET_ID__', CURRENT_ASSET_ID) 
+                    .replace('__COMPONENT_ID__', componentId);
 
         const formData = new FormData();
-        formData.append(field, value);
+        formData.append(field, value); // Field bisa 'status' atau 'category'
 
-        // Feedback visual saat proses
         const row = document.getElementById(`row-${componentId}`);
         const originalBg = row.style.backgroundColor;
-        row.style.backgroundColor = '#f5f6f7'; // Abu-abu muda
+        
+        // Efek visual loading
+        row.style.backgroundColor = '#fff3cd'; 
 
         fetch(url, {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+             if (!response.ok) throw new Error(`Server error: ${response.status}`);
+             return response.json();
+        })
         .then(data => {
-            row.style.backgroundColor = originalBg;
+            row.style.backgroundColor = originalBg; 
+            
             if (data.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: data.message,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
+                // Jika yang diubah adalah STATUS, update warna baris
+                if (field === 'status') {
+                    const newRowClass = STATUS_ROW_MAP[value] || 'status-good-row';
+                    allRowStatusClasses.forEach(cls => row.classList.remove(cls));
+                    row.classList.add(newRowClass);
+                    selectElement.className = `form-select form-select-sm component-status ${newRowClass}`;
+                }
+
+                // Alert sukses (Gabungan SweetAlert temanmu)
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: data.message,
-                    timer: 3000
-                });
+                throw new Error(data.message);
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error AJAX:', error);
             row.style.backgroundColor = originalBg;
-            Swal.fire({
-                icon: 'error',
-                title: 'Koneksi Gagal',
-                text: 'Gagal mengirim update ke server.',
-                timer: 3000
-            });
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Update',
+                    text: error.message
+                });
+            } else {
+                alert('Gagal update: ' + error.message);
+            }
         });
     }
 </script>
-
-<style>
-    /* Custom styling untuk halaman ini */
-    .form-select-sm {
-        font-size: 0.875rem;
-        padding: 0.375rem 0.75rem;
-    }
-    
-    .card-header {
-        font-weight: 600;
-        color: var(--text-dark);
-    }
-</style>
-
 {% endblock %}
