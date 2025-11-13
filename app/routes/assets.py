@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from app.utils.db import assets_collection, schedules_collection
+from app.utils.db import work_orders_collection # <-- IMPORT BARU
+import datetime # <-- IMPORT BARU
 from bson.objectid import ObjectId
 
 # -----------------------------
@@ -329,11 +331,15 @@ def detail_asset(asset_id):
 # -----------------------------
 # 9. RUTE: UPDATE KOMPONEN (FITUR LIVE UPDATE)
 # -----------------------------
+# -----------------------------
+# 9. RUTE: UPDATE KOMPONEN (FITUR LIVE UPDATE)
+# -----------------------------
 @assets_bp.route('/update_component_status/<asset_id>/<component_id>', methods=['POST'])
 def update_component_status(asset_id, component_id):
     """
     Memperbarui status atau kategori komponen spesifik dalam array 'components' 
     menggunakan MongoDB Positional Operator ($).
+    JIKA STATUS = CRITICAL, OTOMATIS MEMBUAT WORK ORDER.
     """
     try:
         new_status = request.form.get('status')
@@ -341,31 +347,39 @@ def update_component_status(asset_id, component_id):
         
         update_fields = {}
         
-        # Cek dan tambahkan update status
         if new_status and new_status in FULL_COMPONENT_STATUSES:
-            # Gunakan positional operator ($) untuk memperbarui elemen yang cocok dengan kriteria
             update_fields["components.$.status"] = new_status
             
-        # Cek dan tambahkan update kategori
         if new_category and new_category in MAINTENANCE_CATEGORIES:
             update_fields["components.$.category"] = new_category
 
         if not update_fields:
-            # Jika tidak ada data yang valid yang dikirim
             return jsonify({"status": "error", "message": "Tidak ada data yang valid yang dikirim."}), 400
 
         # Query untuk menemukan Aset dan Komponen (kriteria komponen di array)
-        result = assets_collection.update_one(
+        # Kita tambahkan 'return_document=True' untuk mendapatkan data aset yang sudah di-update
+        updated_asset = assets_collection.find_one_and_update(
             {"_id": ObjectId(asset_id), "components.component_id": component_id},
-            {"$set": update_fields}
+            {"$set": update_fields},
+            return_document=True # <-- MINTA DOKUMEN YANG SUDAH DI-UPDATE
         )
 
-        if result.modified_count == 1:
-            # Tambahkan logika untuk memeriksa apakah status berubah menjadi Critical
-            if new_status and "Critical" in new_status:
-                 # Di sini Anda bisa menambahkan trigger untuk membuat Work Order otomatis (jika ada)
-                 print(f"ALERT: Komponen {component_id} pada aset {asset_id} dalam status KRITIS: {new_status}.")
+        if updated_asset:
             
+            # --- LOGIKA BARU UNTUK AUTO-CREATE WORK ORDER ---
+            if new_status and "Critical" in new_status:
+                
+                # Cari nama komponen yang baru saja di-update
+                component_name = "Komponen tidak dikenal"
+                for comp in updated_asset.get('components', []):
+                    if comp.get('component_id') == component_id:
+                        component_name = comp.get('name')
+                        break
+                
+                # Panggil fungsi helper untuk membuat WO
+                auto_create_work_order(updated_asset, component_name, new_status)
+            # --- AKHIR LOGIKA BARU ---
+                
             return jsonify({"status": "success", "message": f"Komponen {component_id} berhasil diperbarui menjadi {new_status or new_category}"})
         else:
             return jsonify({"status": "error", "message": "Komponen atau Aset tidak ditemukan."}), 404
@@ -403,3 +417,45 @@ def update_asset(asset_id):
         flash("❌ Gagal memperbarui data aset.", "error")
 
     return redirect(url_for('assets.detail_asset', asset_id=asset_id))
+
+def auto_create_work_order(asset, component_name, new_status):
+    """
+    Helper function untuk membuat Work Order secara otomatis
+    dan mengubah status aset menjadi 'Under Maintenance'.
+    """
+    try:
+        current_time = datetime.datetime.now(datetime.timezone.utc)
+        wo_title = f"KRITIS: Komponen '{component_name}' pada {asset['asset_name']} Rusak"
+        wo_description = f"Status komponen '{component_name}' diubah menjadi '{new_status}' oleh sistem. Mohon segera diperiksa."
+        
+        new_wo = {
+            "asset_id": asset['_id'],
+            "asset_name": asset['asset_name'],
+            "type": "Incident", # Ini adalah Insiden
+            "title": wo_title,
+            "description": wo_description,
+            "priority": "High", # Otomatis prioritas tinggi
+            "status": "Open", 
+            "created_at": current_time,
+            "history_log": [
+                {
+                    "timestamp": current_time,
+                    "user": "Sistem CMMS", # Dibuat oleh sistem
+                    "action": f"Work Order dibuat otomatis karena status '{component_name}' menjadi Critical."
+                }
+            ]
+        }
+        
+        # 1. Masukkan Work Order baru
+        work_orders_collection.insert_one(new_wo)
+        
+        # 2. Update status aset utama menjadi 'Under Maintenance'
+        assets_collection.update_one(
+            {"_id": asset['_id']},
+            {"$set": {"status": "Under Maintenance"}}
+        )
+        print(f"Work Order otomatis dibuat untuk Aset ID: {asset['_id']}")
+        
+    except Exception as e:
+        print(f"Error saat auto-create WO: {e}")
+    

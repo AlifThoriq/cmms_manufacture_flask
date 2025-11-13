@@ -1,54 +1,151 @@
 {% extends "base_layout.html" %}
 
 {% block content %}
-<h2>Detail Work Order: {{ wo.title }}</h2>
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold"><i class="fa fa-clipboard-list text-primary me-2"></i> WO: {{ wo.title }}</h2>
+            <p class="text-muted mb-0">ID: {{ wo._id }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <span class="badge fs-5 
+                {% if wo.status == 'Open' %}bg-danger
+                {% elif wo.status == 'In-Progress' %}bg-warning text-dark
+                {% else %}bg-success{% endif %}">
+                {{ wo.status }}
+            </span>
+        </div>
+    </div>
 
-<div style="float: right; border: 1px solid #ccc; padding: 10px;">
-    <h4>Informasi Aset</h4>
-    <p><strong>Nama:</strong> {{ wo.asset_name }}</p>
-    <p><strong>Tipe:</strong> {{ wo.type }}</p>
-    <p><strong>Status WO:</strong> {{ wo.status }}</p>
-    <p><strong>Prioritas:</strong> {{ wo.priority }}</p>
+    <div class="row">
+        <div class="col-lg-8">
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light fw-bold">Deskripsi Masalah</div>
+                <div class="card-body">
+                    <p class="card-text">{{ wo.description }}</p>
+                    <hr>
+                    <div class="row text-sm">
+                        <div class="col-6"><strong>Aset:</strong> {{ wo.asset_name }}</div>
+                        <div class="col-6"><strong>Tipe WO:</strong> {{ wo.type }}</div>
+                        <div class="col-6"><strong>Prioritas:</strong> {{ wo.priority }}</div>
+                        <div class="col-6"><strong>Dibuat:</strong> {{ wo.created_at.strftime('%d %b %Y, %H:%M') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if wo.type == 'Incident' %}
+            <div class="card shadow-sm mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fa fa-boxes me-2"></i> Sparepart yang Digunakan (Real-time)
+                </div>
+                <div class="card-body p-0">
+                    {% if wo.used_parts %}
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nama Part</th>
+                                <th class="text-center">Jumlah</th>
+                                <th class="text-end">Waktu Ambil</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for part in wo.used_parts %}
+                            <tr>
+                                <td>{{ part.part_name }}</td>
+                                <td class="text-center">{{ part.quantity }}</td>
+                                <td class="text-end text-muted small">{{ part.taken_at.strftime('%H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="p-3 text-center text-muted fst-italic">Belum ada sparepart yang diambil untuk WO ini.</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if wo.status != 'Closed' %}
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <i class="fa fa-tools me-2"></i> Update Tindakan / Pengerjaan
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        
+                        {% if wo.type == 'Incident' %}
+                        <div class="bg-light p-3 rounded border mb-3">
+                            <h6 class="fw-bold text-primary mb-3"><i class="fa fa-dolly"></i> Ambil Sparepart dari Gudang (Opsional)</h6>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-8">
+                                    <label class="form-label small">Pilih Sparepart (Stok Tersedia):</label>
+                                    <select name="part_id" class="form-select">
+                                        <option value="" selected>-- Tidak mengambil part --</option>
+                                        {% for part in inventory_parts %}
+                                        <option value="{{ part._id }}">
+                                            {{ part.part_name }} (Stok: {{ part.stock_on_hand }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Jumlah:</label>
+                                    <input type="number" name="quantity_used" class="form-control" min="0" value="0">
+                                </div>
+                            </div>
+                            <small class="text-muted">*Stok gudang akan otomatis berkurang saat disimpan.</small>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label for="action_log" class="form-label fw-bold">Catatan / Log Pengerjaan:</label>
+                            <textarea id="action_log" name="action_log" class="form-control" rows="3" required 
+                                      placeholder="Jelaskan apa yang anda kerjakan saat ini..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="final_status" class="form-label fw-bold">Update Status WO:</label>
+                            <select id="final_status" name="final_status" class="form-select">
+                                <option value="In-Progress" {% if wo.status == 'In-Progress' %}selected{% endif %}>
+                                    In-Progress (Masih Dikerjakan)
+                                </option>
+                                <option value="Closed">
+                                    Closed (Selesai & Tutup WO)
+                                </option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fa fa-save me-1"></i> Simpan Update & Ambil Part
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-success">
+                <i class="fa fa-check-circle me-2"></i> Work Order ini sudah selesai (Closed).
+            </div>
+            {% endif %}
+
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">Histori Log Lengkap</div>
+                <ul class="list-group list-group-flush" style="max-height: 600px; overflow-y: auto;">
+                    {% for log in wo.history_log|reverse %}
+                    <li class="list-group-item">
+                        <small class="text-muted d-block">{{ log.timestamp.strftime('%d %b %H:%M') }} | {{ log.user }}</small>
+                        <span class="d-block mt-1">{{ log.action }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3">
+        <a href="{{ url_for('work_orders.list_work_orders') }}" class="btn btn-secondary">&larr; Kembali</a>
+    </div>
 </div>
-
-<h3>Deskripsi Masalah</h3>
-<p>{{ wo.description }}</p>
-
-<hr>
-
-{% if wo.status != 'Closed' %}
-<h3>Update / Tutup Work Order</h3>
-<p>Gunakan form ini untuk mencatat tindakan perbaikan atau menutup work order.</p>
-<form method="POST">
-    <div>
-        <label for="action_log">Catatan Tindakan:</label><br>
-        <textarea id="action_log" name="action_log" rows="4" cols="50" required 
-                  placeholder="Misal: 'Bearing diganti dengan part baru. Vibrasi normal.'"></textarea>
-    </div>
-    <br>
-    <div>
-        <label for="final_status">Ubah Status Menjadi:</label><br>
-        <select id="final_status" name="final_status" required>
-            <option value="In-Progress">In-Progress (Tindakan dicatat, tapi belum selesai)</option>
-            <option value="Closed">Closed (Pekerjaan Selesai)</option>
-        </select>
-    </div>
-    <br>
-    <button type="submit">Simpan Update</button>
-</form>
-<hr>
-{% endif %}
-
-<h3>Histori Log untuk Work Order Ini</h3>
-<ul>
-    {% for log in wo.history_log|reverse %}
-        <li>
-            <strong>{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</strong> 
-            (oleh {{ log.user }}): {{ log.action }}
-        </li>
-    {% endfor %}
-</ul>
-
-<br>
-<a href="{{ url_for('work_orders.list_work_orders') }}">&larr; Kembali ke Daftar WO Aktif</a>
 {% endblock %}

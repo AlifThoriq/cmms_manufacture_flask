@@ -1,41 +1,66 @@
 {% extends "base_layout.html" %}
 
 {% block content %}
-<h2>Laporan Kerusakan / Work Order Baru</h2>
-<p>Anda sedang membuat laporan untuk aset: 
-    <strong>{{ asset.asset_name }} ({{ asset.type }})</strong>
-</p>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <h2 class="mb-4">Buat Laporan Work Order Baru</h2>
+        
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <p class="lead">Anda sedang membuat laporan untuk aset: 
+                    <strong class="text-primary">{{ asset.asset_name }} ({{ asset.type }})</strong>
+                </p>
+                <hr>
 
-<form method="POST">
-    <div>
-        <label for="wo_type">Tipe Laporan:</label><br>
-        <select id="wo_type" name="wo_type" required>
-            <option value="Incident">Insiden / Kerusakan</option>
-            <option value="Audit">Laporan Audit</option>
-            <option value="Compliance">Pengecekan Kepatuhan</option>
-        </select>
+                <form method="POST">
+                    
+                    <h5 class="fw-bold">1. Detail Laporan</h5>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Judul Laporan (Wajib):</label>
+                        <input type="text" id="title" name="title" class="form-control" required placeholder="Misal: Bearing Crusher 01 panas">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Prioritas:</label>
+                        <select id="priority" name="priority" class="form-select" required>
+                            <option value="Low">Rendah</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">Tinggi (Darurat)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Deskripsi / Keterangan (Wajib):</label>
+                        <textarea id="description" name="description" class="form-control" rows="4" required 
+                                  placeholder="Jelaskan apa yang terjadi..."></textarea>
+                    </div>
+
+                    <input type="hidden" name="wo_type" value="Incident">
+
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold">2. Tandai Komponen yang Rusak (Opsional)</h5>
+                    <p class="text-muted small">Pilih satu atau lebih komponen yang terkait dengan laporan ini. 
+                        Status komponen yang dipilih akan otomatis diubah menjadi "Critical / Down".</p>
+                    
+                    <div class="list-group mb-3" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: .25rem;">
+                        {% for comp in asset.components %}
+                            <label class="list-group-item">
+                                <input class="form-check-input me-2" 
+                                       type="checkbox" 
+                                       name="komponen_rusak" 
+                                       value="{{ comp.component_id }}">
+                                <strong>{{ comp.name }}</strong> (ID: {{ comp.component_id }})
+                                <small class="text-muted d-block">Status Saat Ini: {{ comp.status }}</small>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 btn-lg">
+                        <i class="fa fa-fire-extinguisher"></i> Kirim Laporan & Buat Work Order
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <br>
-    <div>
-        <label for="title">Judul Laporan:</label><br>
-        <input type="text" id="title" name="title" required placeholder="Misal: Bearing Crusher 01 panas">
-    </div>
-    <br>
-    <div>
-        <label for="priority">Prioritas:</label><br>
-        <select id="priority" name="priority" required>
-            <option value="Low">Rendah</option>
-            <option value="Medium">Medium</option>
-            <option value="High">Tinggi (Darurat)</option>
-        </select>
-    </div>
-    <br>
-    <div>
-        <label for="description">Deskripsi / Keterangan:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50" required 
-                  placeholder="Jelaskan apa yang terjadi..."></textarea>
-    </div>
-    <br>
-    <button type="submit">Buat Laporan</button>
-</form>
+</div>
 {% endblock %}
