@@ -6,7 +6,7 @@
     <strong>{{ schedule.task_name }} ({{ schedule.asset_type }})</strong>
 </p>
 
-<form method="POST" action="#">
+<form id="maintenanceForm" method="POST" action="#">
     
     <!-- Tipe Laporan (Grayed Out dan tidak bisa diubah) -->
     <div>
@@ -51,4 +51,50 @@
         Submit Perawatan
     </button>
 </form>
+
+</form>
+
+<!-- MODAL KONFIRMASI -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-3 shadow-lg">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Konfirmasi Submit</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Apakah Anda yakin untuk submit data perawatan ini?</p>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tidak</button>
+        <button type="button" class="btn btn-success" id="confirmYes">Ya</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT KONFIRMASI -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById("maintenanceForm");
+    const modal = new bootstrap.Modal(document.getElementById("confirmModal"));
+    const confirmYes = document.getElementById("confirmYes");
+
+    let allowSubmit = false;
+
+    form.addEventListener("submit", function(event) {
+        if (!allowSubmit) {
+            event.preventDefault(); // cegah submit dulu
+            modal.show();
+        }
+    });
+
+    confirmYes.addEventListener("click", function() {
+        allowSubmit = true; // izinkan submit
+        modal.hide();
+        form.submit(); // submit manual
+    });
+});
+</script>
+
 {% endblock %}

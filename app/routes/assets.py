@@ -34,10 +34,10 @@ MAINTENANCE_CATEGORIES = [
 
 # Placeholder Gambar Mesin (Gunakan URL gambar nyata Anda)
 MACHINE_IMAGE_URLS = {
-    "Crusher": "/static/img/crusher.jpg",
-    "Ball Mill": "/static/img/ball mill.jpeg",
-    "Flotation Cell": "/static/img/flotation.jpeg",
-    "Smelter / Furnace": "/static/img/smelter.jpeg"
+    "Crusher": "/static/img/crusher.png",
+    "Ball Mill": "/static/img/ball mill.png",
+    "Flotation Cell": "/static/img/flotation.png",
+    "Smelter / Furnace": "/static/img/smelter.png"
 }
 
 # -----------------------------
